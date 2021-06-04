@@ -1,0 +1,15 @@
+{
+    "autoMessages": [
+        "Check out our discord!"
+    ],
+    "servers": [
+        {
+            "logPath": "",
+            "host": "localhost",
+            "port": 25565,
+            "rconPort": 25575,
+            "rconPassword": "test",
+            "game": "minecraft"
+        }
+    ]
+}
