@@ -10,8 +10,8 @@ class Client extends EventEmitter {
     }
 
     tell(message) {
-        const command = this.server.rcon.parser.commandTemplates.tellraw(this, message)
-        this.server.rcon.executeCommand(command)
+        const command = this.server.rcon.parser.commandTemplates.tell(this, message)
+        this.server.rcon.command(command)
     }
 }
 

@@ -96,19 +96,19 @@ const createHandshakePacket = (host, port) => {
 
 const parser = {
     commandTemplates: {
-        tellraw: (client, message) => {
+        tell: (client, message) => {
             const json = JSON.stringify({
                 text: message
             })
     
-            return `/tellraw ${client.name} ${json}`
+            return `tellraw ${client.name} ${json}`
         },
         broadcast: (message) => {
             const json = JSON.stringify({
                 text: message
             })
     
-            return `/tellraw @a ${json}`
+            return `tellraw @a ${json}`
         }
     }
 }
@@ -225,7 +225,9 @@ class Rcon {
         return players
     }
 
-    executeCommand(command) {
+    command(command) {
+        command = '/' + command
+
         return new Promise(async (resolve, reject) => {
             var error = null
 
@@ -239,7 +241,7 @@ class Rcon {
                     return
                 }
 
-                resolve(result)
+                resolve(result.payload.toString())
             })
         })
     }

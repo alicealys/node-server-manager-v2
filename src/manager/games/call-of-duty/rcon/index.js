@@ -8,7 +8,7 @@ const parser = {
         status: () => {
             return 'status'
         },
-        tellraw: (client, message) => {
+        tell: (client, message) => {
             return `tell ${client.slot} \"${message}\"`
         },
         broadcast: (message) => {
@@ -42,7 +42,7 @@ class Rcon {
 
     connect() {
         return new Promise(async (resolve, reject) => {
-            const result = await this.executeCommand(this.parser.commandTemplates.status())
+            const result = await this.command(this.parser.commandTemplates.status())
 
             if (!result) {
                 reject(new Error('Rcon connection failed'))
@@ -55,7 +55,7 @@ class Rcon {
 
     playerList() {
         return new Promise(async (resolve, reject) => {
-            const status = await this.executeCommand(this.parser.commandTemplates.status)
+            const status = await this.command(this.parser.commandTemplates.status)
             if (!status) {
                 return false
             }
@@ -76,7 +76,7 @@ class Rcon {
         })
     }
 
-    executeCommand(command) {
+    command(command) {
         return new Promise(async (_resolve, _reject) => {
             const sync = this.parser.commandDelay
             if (sync) {

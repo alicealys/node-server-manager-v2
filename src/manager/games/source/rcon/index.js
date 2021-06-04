@@ -15,7 +15,7 @@ const encodePacket = (packet) => {
     buffer.writeInt32LE(packet.type, 8)
 
     packet.payload.copy(buffer, 12)
-    
+
     buffer.writeInt16LE(0, buffer.length - 2)
 
     return buffer
@@ -32,7 +32,7 @@ const decodePacket = (buffer) => {
 
 const parser = {
     commandTemplates: {
-        tellraw: (client, message) => {
+        tell: (client, message) => {
             return `say ${message}`
         },
         broadcast: (message) => {
@@ -127,7 +127,7 @@ class Rcon {
         return []
     }
 
-    executeCommand(command) {
+    command(command) {
         return new Promise(async (resolve, reject) => {
             var error = null
 
