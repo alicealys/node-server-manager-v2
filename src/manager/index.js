@@ -26,7 +26,7 @@ io.print(commitId == lastCommit
     ? '^2node-server-manager-v2 is up to date^7' 
     : `^3An update is available, run ^4\'git pull\'^3 to update^7`)
 
-io.print(`\nRunning ^4${credits}^7...\n`)
+io.print(`Running ^4${credits}^7...\n`)
 
 const handleConnectError = (cfg, e) => {
     io.print(`Connection to '^3${cfg.game}^7' server at ^3${cfg.host}:${cfg.port}^7 failed: ^1${e}`)

@@ -1,4 +1,4 @@
-const Client = require('../../server/client')
+const Client = require('../../../server/client')
 
 class Dispatcher {
     constructor(server) { 

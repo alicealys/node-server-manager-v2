@@ -3,6 +3,7 @@ var server = null
 
 const onConnect = (client) => {
     console.log(`${client.name} connected`)
+    client.tell(`Hello ${client.name}`)
 }
 
 const onMessage = (client, message) => {
@@ -15,7 +16,6 @@ const onPreconnect = (client) => {
 
 const onDisconnect = (client) => {
     console.log(`${client.name} disconnected`)
-    console.log(server.clients)
 }
 
 component.onInit = (_server) => {

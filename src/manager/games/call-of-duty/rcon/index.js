@@ -1,7 +1,7 @@
-const Mutex     = require('../../../utils/mutex')
-const dgram     = require('dgram')
-const string    = require('../../../utils/string')
-const delay     = require('delay')
+const dgram  = require('dgram')
+const delay  = require('delay')
+const Mutex  = require('../../../../utils/mutex')
+const string = require('../../../../utils/string')
 
 const parser = {
     commandTemplates: {

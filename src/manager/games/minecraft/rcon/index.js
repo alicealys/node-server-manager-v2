@@ -1,6 +1,6 @@
-const Mutex = require('../../../utils/mutex')
-const net = require('net')
+const net    = require('net')
 const varint = require('varint')
+const Mutex  = require('../../../../utils/mutex')
 
 const PacketTypes = {
     Auth: 3,

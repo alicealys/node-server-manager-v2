@@ -1,5 +1,5 @@
-const io = require('../../../utils/io')
-const Parser = require('./parser')
+const io         = require('../../../../utils/io')
+const Parser     = require('./parser')
 const Dispatcher = require('./dispatcher')
 
 class Log {

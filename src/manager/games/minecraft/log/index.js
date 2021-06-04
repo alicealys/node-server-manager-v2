@@ -1,4 +1,4 @@
-const io         = require('../../../utils/io')
+const io         = require('../../../../utils/io')
 const Parser     = require('./parser')
 const Dispatcher = require('./dispatcher')
 
