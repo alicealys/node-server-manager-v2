@@ -94,20 +94,22 @@ const createHandshakePacket = (host, port) => {
     ])
 }
 
-const commandTemplates = {
-    tellraw: (client, message) => {
-        const json = JSON.stringify({
-            text: message
-        })
-
-        return `/tellraw ${client.name} ${json}`
-    },
-    broadcast: (message) => {
-        const json = JSON.stringify({
-            text: message
-        })
-
-        return `/tellraw @a ${json}`
+const parser = {
+    commandTemplates: {
+        tellraw: (client, message) => {
+            const json = JSON.stringify({
+                text: message
+            })
+    
+            return `/tellraw ${client.name} ${json}`
+        },
+        broadcast: (message) => {
+            const json = JSON.stringify({
+                text: message
+            })
+    
+            return `/tellraw @a ${json}`
+        }
     }
 }
 
@@ -115,7 +117,7 @@ class Rcon {
     constructor(config) {
         this.config = config
 
-        this.commandTemplates = commandTemplates
+        this.parser = parser
 
         this.packetId = 0
 
@@ -213,13 +215,32 @@ class Rcon {
 
     async playerList() {
         const status = await this.ping()
-        return status.players.sample ? status.players.sample : []
+        const _players = status.players.sample ? status.players.sample : []
+        const players = []
+
+        for (var i = 0; i < _players.length; i++) {
+            players.push({...{num: -1}, ..._players[i]})
+        }
+
+        return players
     }
 
     executeCommand(command) {
         return new Promise(async (resolve, reject) => {
-            const result = await this.writePacket(PacketTypes.Command, Buffer.from(command))
-            resolve(result)
+            var error = null
+
+            this.writePacket(PacketTypes.Command, Buffer.from(command))
+            .catch((err) => {
+                error = err
+                resolve(false)
+            })
+            .then((result) => {
+                if (error) {
+                    return
+                }
+
+                resolve(result)
+            })
         })
     }
 }

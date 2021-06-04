@@ -8,6 +8,12 @@ const isNix = () => {
 }
 
 module.exports = {
+    print: (string) => {
+        string += '^7'
+
+        const formatted = string.replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), `\x1b[3$1m`)
+        console.log(formatted)
+    },
     FileWatcher: class extends EventEmitter {
         constructor(path) {
             super()
@@ -33,7 +39,7 @@ module.exports = {
         }
         pipe(callback) {
             this.on('data', (data) => {
-                callback(data.toString())
+                callback(data.toString().trim())
             })
         }
     }

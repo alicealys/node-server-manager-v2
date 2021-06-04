@@ -4,6 +4,6 @@ module.exports = {
             template = template.replace(new RegExp(`${c}${value[0].toLocaleUpperCase()}${c}`, flags), value[1])
         })
 
-        return template.split('\n')
+        return template
     }
 }

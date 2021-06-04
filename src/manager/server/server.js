@@ -20,7 +20,7 @@ class Server extends EventEmitter {
         for (var i = 0; i < players.length; i++) {
             const player = players[i]
 
-            this.clients[i] = new Client(player.id, player.name, -1, this)
+            this.clients[i] = new Client(player.id, player.name, player.slot, this)
             this.clients[i].emit('preconnect')
             this.emit('preconnect', this.clients[i])
         }

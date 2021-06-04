@@ -1,6 +1,7 @@
 const config = require('../../config/config.json')
 const Server = require('./server/server')
 const Loader = require('./loader')
+const io     = require('../utils/io')
 
 const globalConfig = {}
 Object.assign(globalConfig, config)
@@ -9,8 +10,14 @@ delete globalConfig.servers
 const servers = []
 
 const handleConnectError = (cfg, e) => {
-    console.log(`Connection to '${cfg.game}' server at ${cfg.ip}:${cfg.port} failed: ${e}`)
+    console.log(`Connection to '${cfg.game}' server at ${cfg.host}:${cfg.port} failed: ${e}`)
 }
+
+process.on('uncaughtException', (err) => {
+    console.log(`Caught unhandled exception: ${err.stack}`)
+})
+
+
 
 config.servers.forEach(async cfg => {
     const server = new Server({...globalConfig, ...cfg})
@@ -32,6 +39,6 @@ config.servers.forEach(async cfg => {
 
         server.start()
         loader.onLoad()
-        console.log(`Connected to '${cfg.game}' server at ${cfg.ip}:${cfg.port}`)
+        console.log(`Connected to '${cfg.game}' server at ${cfg.host}:${cfg.port}`)
     })
 })

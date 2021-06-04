@@ -1,0 +1,12 @@
+*.json
+*.db
+*.txt
+node_modules
+*.log
+*.db-journal
+*.save
+*.swp
+!Configuration/DefaultGameSettings.json
+!Configuration/Localization-*.json
+Log/*
+Log
