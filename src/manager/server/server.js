@@ -28,7 +28,7 @@ class Server extends EventEmitter {
 
     broadcast(message) {
         const command = this.rcon.commandTemplates.broadcast(message)
-        this.rcon.executeCommand(command)
+        this.rcon.command(command)
     }
 }
 

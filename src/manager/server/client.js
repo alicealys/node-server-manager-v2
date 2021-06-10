@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const string = require('../../utils/string')
 
 class Client extends EventEmitter {
     constructor(id, name, slot, server) {
@@ -10,7 +11,7 @@ class Client extends EventEmitter {
     }
 
     tell(message) {
-        const command = this.server.rcon.parser.commandTemplates.tell(this, message)
+        const command = string.format(this.server.rcon.parser.commandTemplates.tell, this.slot, message)
         this.server.rcon.command(command)
     }
 }

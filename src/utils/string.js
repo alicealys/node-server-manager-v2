@@ -1,9 +1,19 @@
 module.exports = {
-    format(template = '', values, c = '%', flags = 'g') {
-        Object.entries(values).forEach(value => {
-            template = template.replace(new RegExp(`${c}${value[0].toLocaleUpperCase()}${c}`, flags), value[1])
+    format(format) {
+        const args = [...arguments].slice(1)
+        var offset = 0
+        
+        format = format.replace(/\[{\d+}\]/g, () => {
+            offset++
+            return ''
         })
 
-        return template
+        return format.replace(/{(\d+)}/g, (match, index) => {
+            index = index - offset
+
+            return args[index] != undefined
+                ? args[index]
+                : match
+        })
     }
 }

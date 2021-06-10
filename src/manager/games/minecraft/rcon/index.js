@@ -96,20 +96,8 @@ const createHandshakePacket = (host, port) => {
 
 const parser = {
     commandTemplates: {
-        tell: (client, message) => {
-            const json = JSON.stringify({
-                text: message
-            })
-    
-            return `tellraw ${client.name} ${json}`
-        },
-        broadcast: (message) => {
-            const json = JSON.stringify({
-                text: message
-            })
-    
-            return `tellraw @a ${json}`
-        }
+        tell: 'tellraw {0} {\"text\": \"{1}\"}',
+        broadcast: 'tellraw {0} {\"text\": \"{1}\"}',
     }
 }
 
@@ -219,7 +207,11 @@ class Rcon {
         const players = []
 
         for (var i = 0; i < _players.length; i++) {
-            players.push({...{num: -1}, ..._players[i]})
+            players.push({
+                slot: _players[i].name,
+                name: _players[i].name,
+                id: _players[i].id,
+            })
         }
 
         return players

@@ -2,20 +2,16 @@ const dgram  = require('dgram')
 const delay  = require('delay')
 const Mutex  = require('../../../../utils/mutex')
 const string = require('../../../../utils/string')
+const fs     = require('fs')
+const path   = require('path')
 
 const parser = {
     commandTemplates: {
-        status: () => {
-            return 'status'
-        },
-        tell: (client, message) => {
-            return `tell ${client.slot} \"${message}\"`
-        },
-        broadcast: (message) => {
-            return `say \"${message}\"`
-        },
+        status: 'status',
+        tell: 'tell {0} \"{1}\"',
+        broadcast: 'say {0}'
     },
-    rconCommandFormat: '\xff\xff\xff\xffrcon %PASSWORD% %COMMAND%',
+    rconCommandFormat: '\xff\xff\xff\xffrcon {0} {1}',
     parseStatus: (match) => {
         const address = match[7].split(':')
 
@@ -36,13 +32,22 @@ const parser = {
 class Rcon {
     constructor(config) {
         this.config = config
-        this.parser = parser
+
+        if (!config.gamename) {
+            throw new Error('Gamename not defined')
+        }
+        
+        if (!fs.existsSync(path.join(__dirname, `./parsers/${config.gamename.toUpperCase()}.js`))) {
+            throw new Error('Game not supported')
+        }
+
+        this.parser = require(`./parsers/${config.gamename.toUpperCase()}`)
         this.mutex = new Mutex()
     }
 
     connect() {
         return new Promise(async (resolve, reject) => {
-            const result = await this.command(this.parser.commandTemplates.status())
+            const result = await this.command(this.parser.commandTemplates.status)
 
             if (!result) {
                 reject(new Error('Rcon connection failed'))
@@ -93,10 +98,10 @@ class Rcon {
             }
 
             const socket = dgram.createSocket('udp4')
-            const message = Buffer.from(string.format(this.parser.rconCommandFormat, {
-                password: this.config.rconPassword,
+            const message = Buffer.from(string.format(this.parser.rconCommandFormat, 
+                this.config.rconPassword,
                 command
-            }), 'binary')
+            ), 'binary')
 
             const end = () => {
                 socket.close()
