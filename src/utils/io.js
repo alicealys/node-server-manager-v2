@@ -30,12 +30,24 @@ module.exports = {
             if (!isNix()) {
                 var tail = spawn(`powershell`, ['-command', 'get-content', '-wait', '-Tail 0', `"${path}"`])
                 tail.stdout.on('data', callback)
+
+                this.destroy = () => {
+                    this.removeAllListeners()
+                    tail.stdout.removeAllListeners()
+                    tail.kill(0)
+                }
                 return
             }
 
             var tail = new Tail(path)
             tail.watch()
             tail.on('line', callback)
+
+            this.destroy = () => {
+                this.removeAllListeners()
+                tail.removeAllListeners()
+                tail.unwatch()
+            }
         }
         pipe(callback) {
             this.on('data', (data) => {
