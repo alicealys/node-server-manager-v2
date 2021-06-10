@@ -36,7 +36,10 @@ class Loader {
 
         var lastChange = new Date()
         fs.watch(path.join(__dirname, './plugins'), (eventType, filename) => {
-            if (!this.loaded || new Date() - lastChange < 100 || !fs.existsSync(path.join(__dirname, `./plugins/${filename}`))) {
+            if (!this.loaded 
+                || new Date() - lastChange < 100 
+                || !fs.existsSync(path.join(__dirname, `./plugins/${filename}`))
+                || !fs.readFileSync(path.join(__dirname, `./plugins/${filename}`)).length) {
                 return
             }
 
