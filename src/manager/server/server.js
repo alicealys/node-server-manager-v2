@@ -13,6 +13,11 @@ class Server extends EventEmitter {
         this.log = new (require(`../games/${config.game}/log`))(this, config)
     }
 
+    emit(event, ...args) {
+        super.emit('*', event, args)
+        super.emit(event, ...args)
+    }
+
     connect() {
         return this.rcon.connect()
     }
