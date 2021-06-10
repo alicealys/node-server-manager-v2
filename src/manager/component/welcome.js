@@ -1,30 +1,7 @@
-const component = {}
-var server = null
-
-const onConnect = (client) => {
-    console.log(`${client.name} connected`)
-    client.tell(`Hello ${client.name}`)
+module.exports = {
+    onLoad: (server) => {
+        server.on('connect', (client) => {
+            client.tell(`Welcome back ${client.name}`)
+        })
+    }
 }
-
-const onMessage = (client, message) => {
-    client.tell(`You said: ${message}`)
-}
-
-const onPreconnect = (client) => {
-    console.log(`${client.name} is already connected`)
-    client.tell(`Hello ${client.name}`)
-}
-
-const onDisconnect = (client) => {
-    console.log(`${client.name} disconnected`)
-}
-
-component.onInit = (_server) => {
-    server = _server
-
-    _server.on('preconnect', onPreconnect)
-    _server.on('connect', onConnect)
-    _server.on('disconnect', onDisconnect)
-}
-
-module.exports = component

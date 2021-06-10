@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs   = require('fs')
 const path = require('path')
 
 const requireUncached = (module) => {
@@ -6,34 +6,21 @@ const requireUncached = (module) => {
     return require(module)
 }
 
-const loadPlugin = (plugin) => {
-    
-}
-
 class Loader {
     constructor(server) {
         this.server = server
+        this.loaded = false
         this.components = []
         this.componentFiles = fs.readdirSync(path.join(__dirname, './component'))
         this.componentFiles.forEach(file => {
             const component = requireUncached(path.join(__dirname, `./component/${file}`))
-
-            if (typeof component.onInit === 'function') {
-                component.onInit(server)
-            }
-
             this.components.push(component)
         })
-
-        if (this.server.config.game != 'call-of-duty') {
-            return
-        }
 
         this.plugins = []
         this.pluginFiles = fs.readdirSync(path.join(__dirname, './plugins'))
         this.pluginFiles.forEach(file => {
             const plugin = {name: file, timeoutHandles: [], intervalHandles: []}
-
             const module = requireUncached(path.join(__dirname, `./plugins/${file}`))
 
             module.onInterval = (callback, interval) => {
@@ -44,24 +31,18 @@ class Loader {
             }
 
             plugin.module = module
-
-            if (typeof module.onLoad === 'function') {
-                module.onLoad(server)
-            }
-
             this.plugins.push(plugin)
         })
 
         var lastChange = new Date()
         fs.watch(path.join(__dirname, './plugins'), (eventType, filename) => {
-            if (new Date() - lastChange < 100) {
+            if (!this.loaded || new Date() - lastChange < 100 || !fs.existsSync(path.join(__dirname, `./plugins/${filename}`))) {
                 return
             }
 
             lastChange = new Date()
 
             const found = this.plugins.find(plugin => plugin.name == filename)
-
             const plugin = found 
                 ? found 
                 : {name: filename, timeoutHandles: [], intervalHandles: []}
@@ -78,18 +59,21 @@ class Loader {
                 clearInterval(handle)
             })
 
-            plugin.module = requireUncached(path.join(__dirname, `./plugins/${filename}`))
-            plugin.module.onInterval = (callback, interval) => {
-                plugin.intervalHandles.push(setInterval(callback, interval))
-            }
-            plugin.module.onTimeout = (callback, timeout) => {
-                plugin.intervalHandles.push(setTimeout(callback, timeout))
-            }
+            try {
+                plugin.module = requireUncached(path.join(__dirname, `./plugins/${filename}`))
 
-
-            if (typeof plugin.module.onLoad === 'function') {
-                plugin.module.onLoad(server)
+                plugin.module.onInterval = (callback, interval) => {
+                    plugin.intervalHandles.push(setInterval(callback, interval))
+                }
+                plugin.module.onTimeout = (callback, timeout) => {
+                    plugin.intervalHandles.push(setTimeout(callback, timeout))
+                }
+    
+                if (typeof plugin.module.onLoad === 'function') {
+                    plugin.module.onLoad(server)
+                }
             }
+            catch (e) {}
         })
 
         server.on('*', (event, args) => {
@@ -100,7 +84,7 @@ class Loader {
                 keys.forEach(key => {
                     const name = key.toLowerCase()
                     if (typeof module[key] === 'function' && name == `on${event}` && name != 'onload' && name != 'onevent') {
-                        module[key](args)
+                        module[key].apply(null, args)
                     } else if (typeof module[key] === 'function' && name == 'onevent') {
                         module[key](event, args)
                     }
@@ -108,27 +92,18 @@ class Loader {
             })
         })
     }
-
-    onEvent(event) {
-        this.components.forEach(component => {
-            if (typeof component.onEvent === 'function') {
-                component.onEvent(event)
-            }
-        })
-    }
-
     onLoad() {
+        this.loaded = true
+
         this.components.forEach(component => {
             if (typeof component.onLoad === 'function') {
-                component.onLoad()
+                component.onLoad(this.server)
             }
         })
-    }
 
-    onEnd() {
-        this.components.forEach(component => {
-            if (typeof component.onEnd === 'function') {
-                component.onEnd()
+        this.plugins.forEach(plugin => {
+            if (typeof plugin.module.onLoad === 'function') {
+                plugin.module.onLoad(this.server)
             }
         })
     }
