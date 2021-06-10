@@ -14,10 +14,6 @@ class Log {
 
         const pipe = (data) => {
             const event = parser.parse(data)
-
-            if (!event.valid) {
-                console.log(data)
-            }
     
             if (event.valid) {
                 dispatcher.dispatch(event)
@@ -26,6 +22,7 @@ class Log {
 
         var currentFile = null
 
+        // Watch the most recent file
         fs.readdir(config.logPath, (err, files) => {
             files = files.map((name) => {
                 return {

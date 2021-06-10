@@ -36,7 +36,8 @@ const parser = {
         tell: 'say [{0}] {1}',
         broadcast: 'say {0}'
     },
-    statusRegex: /# +(\d+) +(\d+) +"(.+)" (\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)/g
+    statusRegex: /# +(\d+) +(\d+) +"(.+)" (\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)/g,
+    statusRegexBot: /#(\d+) +"(.+)" +(\S+) +(\S+) +(\d+)/g
 }
 
 class Rcon {
@@ -101,7 +102,14 @@ class Rcon {
                 payload: payload
             })
 
+            const timeout = setTimeout(() => {
+                console.log('timed out')
+                this.socket.removeListener('error', onError)
+                this.socket.removeListener('data', onData)
+            }, 1000)
+
             const onError = (err) => {
+                clearTimeout(timeout)
                 this.socket.removeListener('data', onData)
                 this.mutex.unlock()
                 reject(err)
@@ -112,6 +120,7 @@ class Rcon {
 
                 const packet = decodePacket(data)
                 if (packet.type == PacketTypes.CommandResponse) {
+                    clearTimeout(timeout)
                     this.socket.removeListener('data', onData)
                     this.mutex.unlock()
                     resolve(packet)
@@ -130,8 +139,20 @@ class Rcon {
         const players = []
 
         lines.forEach(line => {
-            const match = this.parser.statusRegex.exec(line)
-            if (match) {
+            line = line.trim()
+
+            if (line.match(this.parser.statusRegexBot)) {
+                const match = this.parser.statusRegexBot.exec(line)
+
+                players.push({
+                    name: match[2],
+                    id: match[2],
+                    slot: parseInt(match[1])
+                })
+            }
+            else if (line.match(this.parser.statusRegex)) {
+                const match = this.parser.statusRegex.exec(line)
+
                 players.push({
                     name: match[3],
                     id: match[4],
@@ -146,11 +167,11 @@ class Rcon {
     command(command) {
         return new Promise(async (resolve, reject) => {
             this.writePacket(PacketTypes.Command, command)
-            .catch((err) => {
-                reject(err)
-            })
             .then((result) => {
                 resolve(result.payload.toString().trim())
+            })
+            .catch((err) => {
+                reject(err)
             })
         })
     }

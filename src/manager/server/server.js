@@ -6,6 +6,7 @@ class Server extends EventEmitter {
         super()
         this.config = config
         this.dvars = {}
+        this.commands = {}
         this.clients = []
         this.dvars = {}
         this.rcon = new (require(`../games/${config.game}/rcon`))(config)
@@ -18,7 +19,7 @@ class Server extends EventEmitter {
 
     async start() {
         const players = await this.rcon.playerList()
-    
+
         for (var i = 0; i < players.length; i++) {
             const player = players[i]
 

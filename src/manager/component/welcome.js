@@ -12,7 +12,7 @@ const onMessage = (client, message) => {
 
 const onPreconnect = (client) => {
     console.log(`${client.name} is already connected`)
-    client.tell('Hello')
+    client.tell(`Hello ${client.name}`)
 }
 
 const onDisconnect = (client) => {

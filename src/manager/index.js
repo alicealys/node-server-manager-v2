@@ -16,7 +16,7 @@ process.on('uncaughtException', (err) => {
 console.log('Checking for updates...')
 
 const hash = require('child_process').execSync('git rev-parse HEAD').toString().trim().substr(0, 8)
-const version = '0.1.0'
+const version = '0.1.1'
 const credits = `node-server-manager-v2 v${version} (${hash}) • fed`
 
 const commitId = require('child_process').execSync('git rev-parse HEAD').toString().trim()
