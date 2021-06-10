@@ -22,7 +22,6 @@ const onDisconnect = (client) => {
 component.onInit = (_server) => {
     server = _server
 
-    _server.on('message', onMessage)
     _server.on('preconnect', onPreconnect)
     _server.on('connect', onConnect)
     _server.on('disconnect', onDisconnect)

@@ -14,6 +14,18 @@ module.exports = {
         const formatted = string.replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), `\x1b[3$1m`)
         console.log(formatted)
     },
+    ConfigWatcher: class {
+        constructor(path) {
+            this.current = JSON.parse(fs.readFileSync(path).toString())
+            fs.watch(path, (eventType, filename) => {
+                try {
+                    const json = JSON.parse(fs.readFileSync(path).toString())
+                    this.current = json
+                }
+                catch (e) {}
+            })
+        }
+    },
     FileWatcher: class extends EventEmitter {
         constructor(path) {
             super()

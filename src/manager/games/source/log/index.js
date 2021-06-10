@@ -20,6 +20,10 @@ class Log {
             }
         }
 
+        if (!fs.existsSync(config.logPath) || !fs.lstatSync(config.logPath).isDirectory()) {
+            return
+        }
+
         var currentFile = null
 
         // Watch the most recent file
