@@ -6,6 +6,7 @@ class Server extends EventEmitter {
         super()
         this.config = config
         this.clients = []
+        this.dvars = {}
         this.rcon = new (require(`../games/${config.game}/rcon`))(config)
         this.log = new (require(`../games/${config.game}/log`))(this, config)
     }

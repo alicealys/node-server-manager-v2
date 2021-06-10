@@ -9,14 +9,14 @@ const PacketTypes = {
 }
 
 const encodePacket = (packet) => {
-    const buffer = new Buffer.alloc(packet.payload.length + 14)
-    buffer.writeInt32LE(buffer.length - 4, 0)
+    const size = Buffer.byteLength(packet.payload) + 14
+    const buffer = Buffer.alloc(size)
+
+    buffer.writeInt32LE(size - 4, 0)
     buffer.writeInt32LE(packet.id, 4)
     buffer.writeInt32LE(packet.type, 8)
-
-    packet.payload.copy(buffer, 12)
-
-    buffer.writeInt16LE(0, buffer.length - 2)
+    buffer.write(packet.payload, 12, size - 2, 'ascii')
+    buffer.writeInt16LE(0, size - 2)
 
     return buffer
 }
@@ -32,19 +32,16 @@ const decodePacket = (buffer) => {
 
 const parser = {
     commandTemplates: {
-        tell: (client, message) => {
-            return `say ${message}`
-        },
-        broadcast: (message) => {
-            return `say ${message}`
-        }
-    }
+        status: 'status',
+        tell: 'say [{0}] {1}',
+        broadcast: 'say {0}'
+    },
+    statusRegex: /# +(\d+) +(\d+) +"(.+)" (\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)/g
 }
 
 class Rcon {
     constructor(config) {
         this.config = config
-
         this.parser = parser
 
         this.packetId = 0
@@ -84,7 +81,7 @@ class Rcon {
                 const packet = encodePacket({
                     id, 
                     type: PacketTypes.Auth, 
-                    payload: Buffer.from(this.config.rconPassword)
+                    payload: this.config.rconPassword
                 })
 
                 this.socket.write(packet)
@@ -106,42 +103,54 @@ class Rcon {
 
             const onError = (err) => {
                 this.socket.removeListener('data', onData)
-                reject(err)
                 this.mutex.unlock()
+                reject(err)
             }
 
             const onData = (data) => {
                 this.socket.removeListener('error', onError)
-                resolve(decodePacket(data))
-                this.mutex.unlock()
+
+                const packet = decodePacket(data)
+                if (packet.type == PacketTypes.CommandResponse) {
+                    this.socket.removeListener('data', onData)
+                    this.mutex.unlock()
+                    resolve(packet)
+                }
             }
 
             this.socket.once('error', onError)
-            this.socket.once('data', onData)
-
+            this.socket.on('data', onData)
             this.socket.write(packet)
         })
     }
 
     async playerList() {
-        return []
+        const status = await this.command(this.parser.commandTemplates.status)
+        const lines = status.split('\n')
+        const players = []
+
+        lines.forEach(line => {
+            const match = this.parser.statusRegex.exec(line)
+            if (match) {
+                players.push({
+                    name: match[3],
+                    id: match[4],
+                    slot: parseInt(match[1])
+                })
+            }
+        })
+
+        return players
     }
 
     command(command) {
         return new Promise(async (resolve, reject) => {
-            var error = null
-
-            this.writePacket(PacketTypes.Command, Buffer.from(command))
+            this.writePacket(PacketTypes.Command, command)
             .catch((err) => {
-                error = err
-                resolve(false)
+                reject(err)
             })
             .then((result) => {
-                if (error) {
-                    return
-                }
-
-                resolve(result.payload.toString())
+                resolve(result.payload.toString().trim())
             })
         })
     }
