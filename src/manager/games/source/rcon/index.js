@@ -59,8 +59,14 @@ class Rcon {
             const onData = (data) => {
                 this.socket.removeListener('error', onError)
                 const response = decodePacket(data)
+
+                if (response.type != PacketTypes.Command) {
+                    return
+                }
+
+                this.socket.removeListener('data', onData)
                 this.mutex.unlock()
-            
+
                 if (response.id == id) {
                     this.socket.removeListener('error', onError)
                     resolve()
@@ -72,8 +78,8 @@ class Rcon {
 
             const onError = (err) => {
                 this.socket.removeListener('data', onData)
-                reject(err)
                 this.mutex.unlock()
+                reject(err)
             }
 
             this.socket.once('error', onError)
@@ -86,7 +92,7 @@ class Rcon {
                 })
 
                 this.socket.write(packet)
-                this.socket.once('data', onData)
+                this.socket.on('data', onData)
             })
         })
     }
