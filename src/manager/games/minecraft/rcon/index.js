@@ -101,7 +101,7 @@ const parser = {
     },
     colors: {
         'white': '§f',
-        'red': '$c',
+        'red': '§c',
         'green': '§a',
         'yellow': '§e',
         'blue': '§b',
