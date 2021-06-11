@@ -98,7 +98,16 @@ const parser = {
     commandTemplates: {
         tell: 'tellraw {0} {\"text\": \"{1}\"}',
         broadcast: 'tellraw {0} {\"text\": \"{1}\"}',
-    }
+    },
+    colors: {
+        'white': '§f',
+        'red': '$c',
+        'green': '§a',
+        'yellow': '§e',
+        'blue': '§b',
+        'purple': '§d',
+        'default': '§f',
+    },
 }
 
 class Rcon {
