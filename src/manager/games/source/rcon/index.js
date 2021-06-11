@@ -36,6 +36,15 @@ const parser = {
         tell: 'say [{0}] {1}',
         broadcast: 'say {0}'
     },
+    colors: {
+        'white': '\x01',
+        'red': '\x07',
+        'green': '\x06',
+        'yellow': '\x10',
+        'blue': '\x0B',
+        'purple': '\x0D',
+        'default': '\x01',
+    },
     statusRegex: /# +(\d+) +(\d+) +"(.+)" (\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)/g,
     statusRegexBot: /#(\d+) +"(.+)" +(\S+) +(\S+) +(\d+)/g
 }

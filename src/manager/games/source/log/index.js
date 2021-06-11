@@ -14,7 +14,7 @@ class Log {
 
         const pipe = (data) => {
             const event = parser.parse(data)
-    
+
             if (event.valid) {
                 dispatcher.dispatch(event)
             }
