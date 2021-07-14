@@ -21,7 +21,13 @@ class Dispatcher {
                         return
                     }
     
-                    const client = new Client(player.id, player.name, player.name, this.server)
+                    const client = new Client({
+                        id: player.id, 
+                        name: player.name, 
+                        slot: player.name, 
+                        server: this.server,
+                        address: null
+                    })
                     await client.build()
                     this.server.clients.push(client)
 

@@ -18,7 +18,6 @@
   "homepage": "https://github.com/fedddddd/node-server-manager-v2#readme",
   "dependencies": {
     "delay": "^5.0.0",
-    "dgram": "^1.0.1",
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "sequelize": "^6.6.5",

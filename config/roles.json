@@ -10,7 +10,8 @@
         "id": "everyone",
         "name": "User",
         "permissions": [
-            "user.*"
+            "user.*",
+            "query.findclient"
         ]
     }
 ]

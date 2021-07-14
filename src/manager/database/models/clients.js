@@ -1,33 +1,33 @@
-module.exports = (sequelize, DataTypes) => {
+module.exports = (sequelize, Sequelize) => {
     const clients = {}
 
     clients.instance = sequelize.define('clients', 
     {
         clientId: {
-            type: DataTypes.INTEGER,
+            type: Sequelize.INTEGER,
             autoIncrement: true,
             allowNull: false,
             primaryKey: true
         },
         uniqueId: {
-            type: DataTypes.TEXT,
+            type: Sequelize.TEXT,
             allowNull: false,
             unique: true
         },
         roles: {
-            type: DataTypes.JSON,
+            type: Sequelize.JSON,
             allowNull: false,
             defaultValue: ['everyone'],
         },
         firstConnection: {
-            type: DataTypes.DATE,
+            type: Sequelize.DATE,
             allowNull: false,
-            defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         },
         lastConnection: {
-            type: DataTypes.DATE,
+            type: Sequelize.DATE,
             allowNull: false,
-            defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         }
     }, {
         timestamps: false
@@ -42,6 +42,10 @@ module.exports = (sequelize, DataTypes) => {
             },
             raw: true
         })
+    }
+
+    clients.findByName = async (name) => {
+        
     }
 
     clients.add = async (uniqueId) => {

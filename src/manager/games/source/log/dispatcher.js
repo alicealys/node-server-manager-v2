@@ -30,7 +30,13 @@ class Dispatcher {
                     const slot = parseInt(event.args[1])
                     const id = event.args[2]
 
-                    const client = new Client(id, name, slot, this.server)
+                    const client = new Client({
+                        id: id, 
+                        name: name, 
+                        slot: slot, 
+                        server: this.server,
+                        address: null
+                    })
                     await client.build()
                     this.server.clients.push(client)
 

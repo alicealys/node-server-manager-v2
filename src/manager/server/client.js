@@ -2,13 +2,13 @@ const EventEmitter = require('events')
 const string = require('../../utils/string')
 
 class Client extends EventEmitter {
-    constructor(uniqueId, name, slot, server) {
+    constructor(fields) {
         super()
-        this.uniqueId = uniqueId
-        this.clientId = null 
-        this.name = name
-        this.slot = slot
-        this.server = server
+
+        const keys = Object.keys(fields)
+        keys.forEach(key => {
+            this[key] = fields[key]
+        })
     }
 
     tell(message, ...args) {
