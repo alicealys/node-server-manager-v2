@@ -22,6 +22,7 @@ class Dispatcher {
                     }
     
                     const client = new Client(player.id, player.name, player.name, this.server)
+                    await client.build()
                     this.server.clients.push(client)
 
                     this.server.emit('connect', client)

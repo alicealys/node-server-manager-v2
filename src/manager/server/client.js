@@ -2,15 +2,16 @@ const EventEmitter = require('events')
 const string = require('../../utils/string')
 
 class Client extends EventEmitter {
-    constructor(id, name, slot, server) {
+    constructor(uniqueId, name, slot, server) {
         super()
-        this.id = id 
+        this.uniqueId = uniqueId
+        this.clientId = null 
         this.name = name
         this.slot = slot
         this.server = server
     }
 
-    tell(message) {
+    tell(message, ...args) {
         if (this.server.rcon.parser.colors) {
             message = this.server.rcon.parser.colors.default + message
             message = message.replace(/\<(.+?)\>/g, (match, index) => {
@@ -24,6 +25,15 @@ class Client extends EventEmitter {
 
         const command = string.format(this.server.rcon.parser.commandTemplates.tell, this.slot, message)
         this.server.rcon.command(command)
+    }
+
+    async build() {
+        const result = await this.server.database.models.clients.add(this.uniqueId)
+        const keys = Object.keys(result)
+        keys.forEach(key => {
+            this[key] = result[key]
+        })
+        this.roles = JSON.parse(this.roles)
     }
 }
 

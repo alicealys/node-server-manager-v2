@@ -2,15 +2,22 @@ const Client = require('./client')
 const EventEmitter = require('events')
 
 class Server extends EventEmitter {
-    constructor(config) {
+    constructor(config, context) {
         super()
         this.config = config
+
         this.dvars = {}
         this.commands = []
         this.clients = []
         this.dvars = {}
+
         this.rcon = new (require(`../games/${config.game}/rcon`))(config)
         this.log = new (require(`../games/${config.game}/log`))(this, config)
+
+        const keys = Object.keys(context)
+        keys.forEach(key => {
+            this[key] = context[key]
+        })
     }
 
     emit(event, ...args) {
@@ -29,6 +36,7 @@ class Server extends EventEmitter {
             const player = players[i]
 
             this.clients[i] = new Client(player.id, player.name, player.slot, this)
+            await this.clients[i].build()
             this.clients[i].emit('preconnect')
             this.emit('preconnect', this.clients[i])
         }

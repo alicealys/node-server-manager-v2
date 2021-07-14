@@ -1,0 +1,4 @@
+{
+    "CMD_COMMAND_NOT_FOUND": "Command not found type <blue>{0}<white> for a list of commands",
+    "CMD_MISSING_PERMISSION": "<red>Insufficient permissions"
+}

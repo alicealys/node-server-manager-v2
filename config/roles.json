@@ -1,0 +1,16 @@
+[
+    {
+        "id": "role_owner",
+        "name": "Owner",
+        "permissions": [
+            "*"
+        ]
+    },
+    {
+        "id": "everyone",
+        "name": "User",
+        "permissions": [
+            "user.*"
+        ]
+    }
+]

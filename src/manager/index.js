@@ -1,7 +1,11 @@
-const config = require('../../config/config.json')
-const Server = require('./server/server')
-const Loader = require('./loader')
-const io     = require('../utils/io')
+const config        = require('../../config/config.json')
+const Server        = require('./server/server')
+const PluginLoader  = require('./server/plugin-loader')
+const Loader        = require('./loader')
+const io            = require('../utils/io')
+const database      = require('./database')
+
+process.env.locale = config.locale || 'en'
 
 const globalConfig = {}
 Object.assign(globalConfig, config)
@@ -20,9 +24,9 @@ const version = '0.1.1'
 const credits = `node-server-manager-v2 v${version} (${hash}) • fed`
 
 const commitId = require('child_process').execSync('git rev-parse HEAD').toString().trim()
-const lastCommit = require('child_process').execSync('git ls-remote https://github.com/fedddddd/node-server-manager-v2.git HEAD').toString().split(/\s+/g)[0].trim()
+const lastCommitId = require('child_process').execSync('git ls-remote https://github.com/fedddddd/node-server-manager-v2.git HEAD').toString().split(/\s+/g)[0].trim()
 
-io.print(commitId == lastCommit 
+io.print(commitId == lastCommitId 
     ? '^2node-server-manager-v2 is up to date^7' 
     : `^3An update is available, run ^4\'git pull\'^3 to update^7`)
 
@@ -32,26 +36,51 @@ const handleConnectError = (cfg, e) => {
     io.print(`Connection to '^3${cfg.game}^7' server at ^3${cfg.host}:${cfg.port}^7 failed: ^1${e}`)
 }
 
-config.servers.forEach(async cfg => {
-    const server = new Server({...globalConfig, ...cfg})
-    servers.push(server)
-    
-    const loader = new Loader(server)
+const manager = {
+    config,
+    servers,
+    version: {
+        hash,
+        version,
+        commitId,
+        lastCommitId
+    }
+}
 
-    var error = null
+const loader = new Loader(manager)
+loader.onInit()
 
-    server.connect()
-    .catch((e) => {
-        error = e
-        handleConnectError(cfg, e)
-    })
-    .then(() => {
-        if (error) {
-            return
-        }
-
-        server.start()
-        loader.onLoad()
-        io.print(`^2Connected^7 to '^3${cfg.game}^7' server at ^3${cfg.host}:${cfg.port}`)
-    })
+process.on('exit', () => {
+    loader.onUnload()
 })
+
+const loadServer = (cfg, context) => {
+    return new Promise((resolve, reject) => {
+        const server = new Server({...globalConfig, ...cfg}, context)
+        servers.push(server)
+        
+        const loader = new PluginLoader(server)
+    
+        server.connect()
+        .then(() => {
+            server.start()
+            loader.onLoad()
+            io.print(`^2Connected^7 to '^3${cfg.game}^7' server at ^3${cfg.host}:${cfg.port}`)
+            resolve()
+        })
+        .catch((e) => {
+            handleConnectError(cfg, e)
+            resolve()
+        })
+    })
+}
+
+(async () => {
+    await database.connect()
+
+    for (const cfg of config.servers) {
+        await loadServer(cfg, {database})
+    }
+
+    loader.onLoad(manager)
+})();
