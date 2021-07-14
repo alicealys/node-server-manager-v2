@@ -1,8 +1,7 @@
-const path   = require('path')
-const io     = require('../../utils/io')
-const string = require('../../utils/string')
-
-const localization = new io.ConfigWatcher(path.join(__dirname, `../../../config/localization-${process.env.locale}.json`))
+const path         = require('path')
+const io           = require('../../utils/io')
+const string       = require('../../utils/string')
+const localization = require('../../utils/localization')
 const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
 module.exports = {

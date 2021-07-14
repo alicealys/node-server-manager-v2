@@ -22,15 +22,15 @@ class Dispatcher {
                     }
     
                     const client = new Client({
-                        id: player.id, 
-                        name: player.name, 
-                        slot: player.name, 
+                        uniqueId: player.uniqueId, 
+                        name: player.name,
+                        slot: player.name,
                         server: this.server,
                         address: null
                     })
                     await client.build()
-                    this.server.clients.push(client)
 
+                    this.server.clients.push(client)
                     this.server.emit('connect', client)
                     break
                 }

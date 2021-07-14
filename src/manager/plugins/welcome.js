@@ -11,6 +11,7 @@ const plugin = {
     onEvent: (event, args) => {
     },
     onLoad: (server) => {
+        console.log('Loaded test plugin')
     }
 }
 

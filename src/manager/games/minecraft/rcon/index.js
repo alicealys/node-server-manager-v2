@@ -219,7 +219,7 @@ class Rcon {
             players.push({
                 slot: _players[i].name,
                 name: _players[i].name,
-                id: _players[i].id,
+                uniqueId: _players[i].id,
             })
         }
 

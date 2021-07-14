@@ -6,3 +6,4 @@ node_modules
 *.db-journal
 *.save
 *.swp
+package-lock.json

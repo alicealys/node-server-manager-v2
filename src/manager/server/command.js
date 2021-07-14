@@ -141,6 +141,18 @@ module.exports = {
                 return
             }
 
+            args.join = (index) => {
+                var buffer = ""
+                for (var i = index; i < args.length; i++) {
+                    buffer += args[i]
+                    if (i < args.length - 1) {
+                        buffer += " "
+                    }
+                }
+
+                return buffer
+            }
+
             this.callback(client, args)
         }
     }

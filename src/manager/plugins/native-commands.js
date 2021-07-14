@@ -5,7 +5,6 @@ const plugin = {
     onMessage: (client, message) => {
     },
     onConnect: (client) => {
-        client.tell(`Welcome back <blue>${client.name}<default>!`)
     },
     onPreconnect: (client) => {
     },

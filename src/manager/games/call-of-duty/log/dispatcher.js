@@ -13,7 +13,7 @@ class Dispatcher {
         switch (event.type) {
             case 'join':
                 {
-                    const id = event.args[2]
+                    const uniqueId = event.args[2]
                     const slot = parseInt(event.args[3])
                     const name = event.args[4]
 
@@ -29,15 +29,15 @@ class Dispatcher {
                     }
 
                     const client = new Client({
-                        id: id, 
+                        uniqueId: uniqueId, 
                         name: name, 
                         slot: slot, 
                         server: this.server,
                         address: null
                     })
                     await client.build()
-                    this.server.clients.push(client)
 
+                    this.server.clients.push(client)
                     this.server.emit('connect', client)
                     break
                 }

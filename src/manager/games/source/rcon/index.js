@@ -161,7 +161,7 @@ class Rcon {
 
                 players.push({
                     name: match[2],
-                    id: match[2],
+                    uniqueId: match[2],
                     slot: parseInt(match[1])
                 })
             }
@@ -170,7 +170,7 @@ class Rcon {
 
                 players.push({
                     name: match[3],
-                    id: match[4],
+                    uniqueId: match[4],
                     slot: parseInt(match[1])
                 })
             }
