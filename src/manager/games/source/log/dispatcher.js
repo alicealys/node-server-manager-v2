@@ -30,12 +30,15 @@ class Dispatcher {
                     const slot = parseInt(event.args[1])
                     const uniqueId = event.args[2]
 
+                    const list = await this.server.rcon.playerList()
+                    const player = list.find(player => player.slot == slot)
+
                     const client = new Client({
                         uniqueId: uniqueId,
                         name: name,
                         slot: slot,
                         server: this.server,
-                        address: null
+                        address: player.address
                     })
                     await client.build()
 

@@ -4,6 +4,7 @@ const string       = require('../../utils/string')
 const localization = require('../../utils/localization')
 
 const configRoles  = new io.ConfigWatcher(path.join(__dirname, '../../../config/roles.json'))
+const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
 const parseParameter = (param, type) => {
     switch (type.toLowerCase()) {
@@ -104,14 +105,15 @@ module.exports = {
     CommandBuilder: class CommandBuilder {
         constructor() {
             this.params = []
+            this.minArgs = 0
         }
         setName(name) {
-            this.name = name
+            this.name = name.toLowerCase()
 
             return this
         }
         setAlias(alias) {
-            this.alias = alias
+            this.alias = alias.toLowerCase()
             
             return this
         }
@@ -121,12 +123,51 @@ module.exports = {
             return this
         }
         setPermission(permission) {
-            this.permission = permission
+            this.permission = permission.toLowerCase()
             
             return this
         }
         setParameterType(index, type) {
-            this.params[index] = type
+            this.params[index + 1] = type.toLowerCase()
+
+            return this
+        }
+        setDescription(description) {
+            this.description = description
+
+            return this
+        }
+        setUsage(usage) {
+            this.usage = usage
+            
+            return this
+        }
+        setMinArgs(args) {
+            this.minArgs = args
+
+            return this
+        }
+        getUsage() {
+            if (this.usage) {
+                return string.format(this.usage, config.current.commandPrefix)
+            }
+
+            if (localization.commands && localization.commands[this.name] && localization.commands[this.name].usage) {
+                return string.format(localization.commands[this.name].usage, config.current.commandPrefix)
+            }
+
+            return localization['NOT_DEFINED']
+        }
+        getDescription() {
+            if (this.description) {
+                return this.description
+            }
+
+            if (localization.commands[this.name].description) {
+                return localization.commands[this.name].description
+            }
+
+            return localization['NOT_DEFINED']
         }
         execute(client, args) {
             for (var i = 0; i < args; i++) {
@@ -138,6 +179,11 @@ module.exports = {
             const role = getRole(client.roles)
             if (!hasPermission(role, this.permission)) {
                 client.tell(string.format(localization['CMD_MISSING_PERMISSION'], this.permission))
+                return
+            }
+
+            if (args.length - 1 < this.minArgs) {
+                client.tell(string.format(localization['CMD_MISSING_ARGUMENTS'], this.getUsage()))
                 return
             }
 

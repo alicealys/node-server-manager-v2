@@ -13,7 +13,7 @@ class Dispatcher {
         switch (event.type) {
             case 'join':
                 {
-                    const uniqueId = event.args[2]
+                    const uniqueId = this.server.rcon.parser.parseGuid(event.args[2])
                     const slot = parseInt(event.args[3])
                     const name = event.args[4]
 
@@ -28,12 +28,15 @@ class Dispatcher {
                         }
                     }
 
+                    const list = await this.server.rcon.playerList()
+                    const player = list.find(player => player.slot == slot)
+
                     const client = new Client({
                         uniqueId: uniqueId, 
                         name: name, 
                         slot: slot, 
                         server: this.server,
-                        address: null
+                        address: player.address
                     })
                     await client.build()
 

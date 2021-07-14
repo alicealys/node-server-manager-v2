@@ -13,14 +13,13 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             allowNull: false,
             references: {
-                model: 'NSMClients',
-                key: 'ClientId'
+                model: 'clients',
+                key: 'clientId'
             }
         },
         uniqueId: {
             type: Sequelize.TEXT,
-            allowNull: false,
-            unique: true
+            allowNull: false
         },
         name: {
             type: Sequelize.TEXT,

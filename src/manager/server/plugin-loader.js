@@ -29,7 +29,8 @@ class Loader {
                 this.plugins.push(plugin)
             }
             catch (e) {
-                console.log(`Error loading plugin ${file}: ${e}`)
+                console.log(`Error loading plugin ${file}:`)
+                console.log(e)
             }
         })
 
@@ -55,7 +56,7 @@ class Loader {
                     plugin.module.onUnload(this.server)
                 }
                 catch (e) {
-                    console.log(`Error unloading plugin: ${plugin.name}: ${e}`)
+                    console.log(`Error unloading plugin: ${plugin.name}:`)
                 }
             }
 
@@ -85,12 +86,14 @@ class Loader {
                         plugin.module.onLoad(this.server)
                     }
                     catch (e) {
-                        console.log(`Error loading plugin: ${plugin.name}: ${e}`)
+                        console.log(`Error loading plugin: ${plugin.name}:`)
+                        console.log(e)
                     }
                 }
             }
             catch (e) {
-                console.log(`Error loading plugin ${plugin.name}: ${e}`)
+                console.log(`Error loading plugin ${plugin.name}:`)
+                console.log(e)
             }
         })
 
@@ -106,14 +109,16 @@ class Loader {
                             module[key].apply(null, args)
                         }
                         catch (e) {
-                            console.log(`Error executing callback '${`on${event}`}' in plugin: ${plugin.name}: ${e}`)
+                            console.log(`Error executing callback '${`on${event}`}' in plugin: ${plugin.name}:`)
+                            console.log(e)
                         }
                     } else if (typeof module[key] === 'function' && name == 'onevent') {
                         try {
                             module[key](event, args)
                         }
                         catch (e) {
-                            console.log(`Error executing callback 'onevent' in plugin: ${plugin.name}: ${e}`)
+                            console.log(`Error executing callback 'onevent' in plugin: ${plugin.name}:`)
+                            console.log(e)
                         }
                     }
                 })
@@ -130,7 +135,8 @@ class Loader {
                     plugin.module.onLoad(this.server)
                 }
                 catch (e) {
-                    console.log(`Error executing callback 'onload' in plugin: ${plugin.name}: ${e}`)
+                    console.log(`Error executing callback 'onload' in plugin: ${plugin.name}:`)
+                    console.log(e)
                 }
             }
         })
@@ -146,6 +152,7 @@ class Loader {
                 }
                 catch (e) {
                     console.log(`Error executing callback 'onunload' in plugin: ${plugin.name}: ${e}`)
+                    console.log(e)
                 }
             }
         })

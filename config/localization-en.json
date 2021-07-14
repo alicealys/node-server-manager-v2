@@ -1,4 +1,22 @@
 {
     "CMD_COMMAND_NOT_FOUND": "Command not found type <blue>{0}<white> for a list of commands",
-    "CMD_MISSING_PERMISSION": "<red>Insufficient permissions"
+    "CMD_MISSING_PERMISSION": "<red>Insufficient permissions",
+    "CMD_COMMAND_DESCRIPTION": "{0}, usage: <yellow>{1}",
+    "CMD_MISSING_ARGUMENTS": "Insufficient arguments, usage: <yellow>{0}",
+
+    "CMD_FIND_RESULT": "<blue>{0}<default> | <blue>@{1}<default> | Active: <blue>{2}<default>",
+    "CMD_HELP_PAGE_FORMAT": "---- Page <yellow>{0}<default> / <yellow>{1}<default> ----",
+
+    "NOT_DEFINED": "Not defined",
+
+    "commands": {
+        "find": {
+            "usage": "{0}find <player>",
+            "description": "Find a player by name"
+        },
+        "help": {
+            "usage": "{0}help [command|page]",
+            "description": "Display list of commands"
+        }
+    }
 }

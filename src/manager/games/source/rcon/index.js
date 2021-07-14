@@ -162,15 +162,21 @@ class Rcon {
                 players.push({
                     name: match[2],
                     uniqueId: match[2],
-                    slot: parseInt(match[1])
+                    slot: parseInt(match[1]),
+                    address: '0.0.0.0'
                 })
             }
             else if (line.match(this.parser.statusRegex)) {
                 const match = this.parser.statusRegex.exec(line)
+                const address = match[10]
 
                 players.push({
                     name: match[3],
                     uniqueId: match[4],
+                    time: match[5],
+                    ping: parseInt(match[6]),
+                    address: address[0],
+                    port: address[1],
                     slot: parseInt(match[1])
                 })
             }

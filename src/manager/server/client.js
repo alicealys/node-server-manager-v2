@@ -11,20 +11,21 @@ class Client extends EventEmitter {
         })
     }
 
-    tell(message, ...args) {
+    async tell(message, ...args) {
         if (this.server.rcon.parser.colors) {
             message = this.server.rcon.parser.colors.default + message
             message = message.replace(/\<(.+?)\>/g, (match, index) => {
+                const original = match
                 match = match.toLowerCase().slice(1, -1)
 
                 return this.server.rcon.parser.colors[match]
                     ? this.server.rcon.parser.colors[match]
-                    : ''
+                    : original
             })
         }
 
         const command = string.format(this.server.rcon.parser.commandTemplates.tell, this.slot, message)
-        this.server.rcon.command(command)
+        await this.server.rcon.command(command)
     }
 
     async build() {

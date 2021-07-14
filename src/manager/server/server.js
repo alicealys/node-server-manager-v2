@@ -20,6 +20,16 @@ class Server extends EventEmitter {
         })
     }
 
+    addCommand(command) {
+        for (var i = 0; i < this.commands.length; i++) {
+            if (this.commands[i].name == command.name) {
+                this.commands.splice(i, 1)
+            }
+        }
+
+        this.commands.push(command)
+    }
+
     emit(event, ...args) {
         super.emit('*', event, args)
         super.emit(event, ...args)
@@ -35,12 +45,7 @@ class Server extends EventEmitter {
         for (var i = 0; i < players.length; i++) {
             const player = players[i]
 
-            this.clients[i] = new Client({ 
-                uniqueId: player.uniqueId,
-                name: player.name,
-                slot: player.slot, 
-                server: this
-            })
+            this.clients[i] = new Client({...player, ...{server: this}})
             await this.clients[i].build()
 
             this.clients[i].emit('preconnect')
