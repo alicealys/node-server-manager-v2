@@ -9,6 +9,31 @@ class Client extends EventEmitter {
         keys.forEach(key => {
             this[key] = fields[key]
         })
+
+        this.meta = new Proxy({}, {
+            get: (target, name) => {
+                return new Promise(async (resolve, reject) => {
+                    const result = await this.get(name)
+                    resolve(result)
+                })
+            },
+            set: (target, name, value) => {
+                return new Promise(async (resolve, reject) => {
+                    const result = await this.set(name, value)
+                    resolve(result)
+                })
+            }
+        })
+    }
+
+    async get(key) {
+        const result = await this.server.database.models.clientMeta.get(this.clientId, key)
+        return result
+    }
+
+    async set(key, value) {
+        const result = await this.server.database.models.clientMeta.set(this.clientId, key, value)
+        return result
     }
 
     async tell(message, ...args) {
