@@ -1,0 +1,29 @@
+{
+  "name": "server-manager-v2",
+  "version": "1.0.0",
+  "description": "Improved version of [node-server-manager](https://github.com/fedddddd/node-server-manager) that supports multiple games",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fedddddd/node-server-manager-v2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fedddddd/node-server-manager-v2/issues"
+  },
+  "homepage": "https://github.com/fedddddd/node-server-manager-v2#readme",
+  "dependencies": {
+    "delay": "^5.0.0",
+    "dgram": "^1.0.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "sequelize": "^6.6.5",
+    "sqlite3": "^5.0.2",
+    "tail": "^2.2.3",
+    "varint": "^6.0.0"
+  }
+}
