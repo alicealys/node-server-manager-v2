@@ -70,6 +70,10 @@ const parseColors = (message) => {
 
 const addServerCommands = (server) => {
     for (const cmd of server.commands) {
+        if (cmd.inGame) {
+            continue
+        }
+
         const callback = async (args) => {
             const client = {
                 clientId: server.database.consoleId,
