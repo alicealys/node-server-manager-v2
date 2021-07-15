@@ -36,21 +36,33 @@ module.exports = (sequelize, Sequelize) => {
     clients.instance.sync()
 
     clients.find = async (uniqueId) => {
-        return await clients.instance.findOne({
+        const result = await clients.instance.findOne({
             where: {
                 uniqueId
             },
             raw: true
         })
+
+        if (result) {
+            result.roles = JSON.parse(result.roles)
+        }
+
+        return result
     }
 
     clients.get = async (clientId) => {
-        return await clients.instance.findOne({
+        const result = await clients.instance.findOne({
             where: {
                 clientId
             },
             raw: true
         })
+
+        if (result) {
+            result.roles = JSON.parse(result.roles)
+        }
+
+        return result
     }
 
     clients.add = async (uniqueId, roles) => {
@@ -73,11 +85,10 @@ module.exports = (sequelize, Sequelize) => {
             return
         }
 
-        const roles = JSON.parse(client.roles)
-        roles.push(role)
+        client.roles.push(role)
 
         await clients.instance.update({
-            roles
+            roles: client.roles
         }, {
             where: {
                 clientId

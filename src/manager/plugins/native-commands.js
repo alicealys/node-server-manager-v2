@@ -33,7 +33,7 @@ const plugin = {
 
                 for (var i = 0; i < result.length; i++) {
                     const resultClient = await database.models.clients.get(result[i].clientId)
-                    const role = commandUtils.getRole(JSON.parse(resultClient.roles))
+                    const role = commandUtils.getRole(resultClient.roles)
                     const roleName = role.color ? `<${role.color}>${role.name}<default>` : role.name
 
                     await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, roleName, result[i].date))
@@ -53,7 +53,7 @@ const plugin = {
                     return commandUtils.hasPermission(role, command.permission)
                 })
 
-                const chunks = array.chunk(commands, 4)
+                const chunks = array.chunk(commands, client.inGame ? 4 : 10)
                 var page = 0
                 if (args.length > 1 && !Number.isInteger(parseInt(args[1]))) {
                     const commandName = args[1].toLowerCase()
@@ -100,23 +100,16 @@ const plugin = {
                 const roleName = args[1].toLowerCase()
                 const accessor = args.join(2)
 
-                const found = await database.getClient(accessor)
-                if (!found) {
+                const target = await server.manager.getClient(accessor)
+                if (!target) {
                     client.tell(localization['CMD_FIND_NO_RESULTS'])
                     return
                 }
-
-                found.roles = JSON.parse(found.roles)
 
                 const roles = commandUtils.getRoles()
                 const role = roles.find(role => role.id.toLowerCase() == roleName || role.name.toLowerCase() == roleName)
 
                 const currentRole = commandUtils.getRole(client.roles)
-
-                const target = server.manager.clients.find(client => client.clientId == found.clientId)
-                if (target) {
-                    target.roles.push(role.id)
-                }
 
                 if (currentRole.index >= role.index) {
                     client.tell(localization['CMD_ADDROLE_HIERARCHY_ERROR'])
@@ -128,12 +121,48 @@ const plugin = {
                     return
                 }
 
-                if (found.roles.find(_role => _role.toLowerCase() == role.id.toLowerCase() || _role.toLowerCase() == role.name.toLowerCase())) {
+                if (target.roles.find(_role => _role.toLowerCase() == role.id.toLowerCase() || _role.toLowerCase() == role.name.toLowerCase())) {
                     client.tell(localization['CMD_ADDROLE_ALREADY_SET'])
                     return
                 }
 
-                database.models.clients.addRole(found.clientId, role.id)
+                if (target.inGame) {
+                    target.roles.push(role.id)
+                }
+
+                const name = role.color ? `<${role.color}>${role.name}<default>` : role.name
+                client.tell(string.format(localization['CMD_ADDROLE_SUCCESS'], name, target.name))
+
+                database.models.clients.addRole(target.clientId, role.id)
+            })
+        )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('listroles')
+            .setAlias('lr')
+            .setPermission('query.listroles')
+            .setMinArgs(1)
+            .setCallback(async (client, args) => {
+                const accessor = args.join(1)
+                const target = await server.manager.getClient(accessor)
+
+                if (!target) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                    return
+                }
+
+                const roles = commandUtils.getClientRoles(target.roles)
+                var buffer = ""
+
+                for (var i = 0; i < roles.length; i++) {
+                    buffer += roles[i].color ? `<${roles[i].color}>${roles[i].name}<default>` : roles[i].name
+                    if (i < roles.length - 1) {
+                        buffer += ", "
+                    }
+                }
+
+                client.tell(string.format(localization['CMD_LISTROLES_FORMAT'], target.name, buffer))
             })
         )
     }

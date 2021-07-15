@@ -61,7 +61,6 @@ class Client extends EventEmitter {
         keys.forEach(key => {
             this[key] = result[key]
         })
-        this.roles = JSON.parse(this.roles)
     }
 }
 

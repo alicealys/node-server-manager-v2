@@ -19,7 +19,8 @@
         "name": "User",
         "permissions": [
             "user.*",
-            "query.findclient"
+            "query.findclient",
+            "query.listroles"
         ]
     }
 ]

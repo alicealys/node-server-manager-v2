@@ -56,6 +56,22 @@ const manager = {
 
         return clients
     },
+    getClient: async (accessor) => {
+        if (!accessor || accessor.length == 0) {
+            return null
+        }
+
+        const byId = accessor[0] == '@'
+        const clientId = parseInt(accessor.substr(1))
+
+        for (const client of manager.clients) {
+            if ((byId && clientId == client.clientId) || (!byId && client.name.match(accessor) && accessor.length > 0)) {
+                return client
+            }
+        }
+
+        return await database.getClient(accessor)
+    },
 }
 
 const loader = new Loader(manager)

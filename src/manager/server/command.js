@@ -68,12 +68,12 @@ const getRoles = () => {
     return currentRoles
 }
 
-const getRole = (clientRoles) => {
+const getClientRoles = (clientRoleIds) => {
     const roles = getRoles()
     var validRoles = []
 
-    for (var i = 0; i < clientRoles.length; i++) {
-        const role = roles.find(role => role.id == clientRoles[i])
+    for (var i = 0; i < clientRoleIds.length; i++) {
+        const role = roles.find(role => role.id == clientRoleIds[i])
         if (role) {
             validRoles.push(role)
         }
@@ -87,7 +87,11 @@ const getRole = (clientRoles) => {
         return a.index - b.index
     })
 
-    return validRoles[0]
+    return validRoles
+}
+
+const getRole = (clientRoleIds) => {
+    return getClientRoles(clientRoleIds)[0]
 }
 
 const hasPermission = (role, permission) => {
@@ -122,6 +126,7 @@ module.exports = {
     hasPermission: hasPermission,
     getRoles: getRoles,
     getRole: getRole,
+    getClientRoles: getClientRoles,
     CommandBuilder: class CommandBuilder {
         constructor() {
             this.params = []

@@ -59,14 +59,23 @@ instance.initialize = async () => {
         name: 'Console',
         address: '0.0.0.0'
     })
-    
+
     instance.consoleId = result.clientId
 }
 
 instance.getClient = async (accessor) => {
+    if (!accessor || accessor.length == 0) {
+        return null
+    }
+
     if (accessor[0] == '@') {
         const clientId = parseInt(accessor.substr(1))
         const result = await instance.models.clients.get(clientId)
+        if (result) {
+            const connection = await instance.models.connections.getLatest(clientId)
+            return {...connection, ...result}
+        }
+
         return result
     } else {
         const result = await instance.models.connections.findByName(accessor, 1)
@@ -74,7 +83,8 @@ instance.getClient = async (accessor) => {
             return null
         }
 
-        return await instance.models.clients.get(result[0].clientId)
+        const client = await instance.models.clients.get(result[0].clientId)
+        return {...result[0], ...client}
     }
 }
 

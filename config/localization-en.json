@@ -10,7 +10,8 @@
     "CMD_ADDROLE_ALREADY_SET": "Client already has that role",
     "CMD_ADDROLE_NOT_FOUND": "Role not found",
     "CMD_ADDROLE_HIERARCHY_ERROR": "You cannot set that role",
-
+    "CMD_ADDROLE_SUCCESS": "Added role <blue>{0}<default> to <blue>{1}<default>",
+    "CMD_LISTROLES_FORMAT": "<blue>{0}<default>'s roles: {1}",
 
     "NOT_DEFINED": "Not defined",
 
@@ -26,6 +27,10 @@
         "addrole": {
             "usage": "{0}addrole <role> <@clientId|name>",
             "description": "Add a role to a client"
+        },
+        "listroles": {
+            "usage": "{0}listroles <@clientId|name>",
+            "description": "List the roles of a client"
         }
     }
 }

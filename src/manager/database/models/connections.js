@@ -49,11 +49,24 @@ module.exports = (sequelize, Sequelize) => {
         }).save()
     }
 
+    connections.getLatest = async (clientId) => {
+        return await connections.instance.findOne({
+            group: ['clientId'],
+            order: [
+                ['date', 'desc']
+            ],
+            raw: true,
+            where: {
+                clientId
+            }
+        })
+    }
+
     connections.findByName = async (name, limit = 50) => {
         const result = await connections.instance.findAll({
             group: ['clientId'],
             order: [
-                ['Date', 'desc']
+                ['date', 'desc']
             ],
             raw: true,
             limit,
