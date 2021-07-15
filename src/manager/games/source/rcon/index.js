@@ -34,7 +34,44 @@ const parser = {
     commandTemplates: {
         status: 'status',
         tell: 'say [{0}] {1}',
-        broadcast: 'say {0}'
+        broadcast: 'say {0}',
+        setDvar: '{0} "{1}"',
+        getDvar: '{0}'
+    },
+    dvarOverrides: {
+        'gametype': {
+            get: {
+                name: 'game_type'
+            },
+            set: {
+                name: 'game_type'
+            }
+        },
+        'sv_maxclients': {
+            get: {
+                type: 'function',
+                callback: (rcon) => {
+                    const status = await rcon.command(this.parser.commandTemplates.status)
+                    const split = status.split('\n')
+
+                    for (const line of split) {
+                        const match = rcon.parser.playersRegex.exec(line)
+                        if (match) {
+                            return match[3]
+                        }
+                    }
+                }
+            }
+        },
+        'mapname': {
+            get: {
+                type: 'function',
+                callback: (rcon) => {
+                    const result = await rcon.getDvar('host_map', true)
+                    return result.split('.')[0]
+                }
+            }
+        }
     },
     colors: {
         'white': '\x01',
@@ -46,11 +83,14 @@ const parser = {
         'default': '\x01',
     },
     statusRegex: /# +(\d+) +(\d+) +"(.+)" (\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)/g,
-    statusRegexBot: /#(\d+) +"(.+)" +(\S+) +(\S+) +(\d+)/g
+    statusRegexBot: /#(\d+) +"(.+)" +(\S+) +(\S+) +(\d+)/g,
+    dvarRegex: /"(.+)" = "(.+)" (?:\( def. "(.*)" \))?(?: |\\w) +- (.+)/g,
+    playersRegex: /players *: +(\d)+ humans, (\d)+ bots \((\d+).+/g,
 }
 
 class Rcon {
-    constructor(config) {
+    constructor(server, config) {
+        this.server = server
         this.config = config
         this.parser = parser
 
@@ -185,6 +225,50 @@ class Rcon {
         return players
     }
 
+    getDvar(name, ignoreOverride = false) {
+        name = name.toLowerCase()
+
+        const override = this.parser.dvarOverrides[name]
+        if (!ignoreOverride && override) {
+            if (!override.get) {
+                return
+            }
+
+            if (override.get.type == 'function') {
+                return await override.get.callback(this)
+            } else {
+                name = override.get.name
+            }
+        }
+
+        const result = await this.command(string.format(this.parser.commandTemplates.getDvar, name))
+        const match = this.parser.dvarRegex.exec(result)
+        if (result && match) {
+            return match[2]
+        }
+
+        return false
+    }
+
+    setDvar(name, value, ignoreOverride = false) {
+        name = name.toLowerCase()
+
+        const override = this.parser.dvarOverrides[name]
+        if (!ignoreOverride && override) {
+            if (!override.set) {
+                return
+            }
+
+            if (override.set.type == 'function') {
+                return await override.set.callback(this)
+            } else {
+                name = override.set.name
+            }
+        }
+
+        return await this.command(string.format(this.parser.commandTemplates.setDvar, name, value))
+    }
+
     command(command) {
         return new Promise(async (resolve, reject) => {
             this.writePacket(PacketTypes.Command, command)
@@ -192,7 +276,7 @@ class Rcon {
                 resolve(result.payload.toString().trim())
             })
             .catch((err) => {
-                reject(err)
+                resolve(false)
             })
         })
     }

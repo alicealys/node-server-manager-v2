@@ -65,7 +65,7 @@ const manager = {
         const clientId = parseInt(accessor.substr(1))
 
         for (const client of manager.clients) {
-            if ((byId && clientId == client.clientId) || (!byId && client.name.match(accessor) && accessor.length > 0)) {
+            if ((byId && clientId == client.clientId) || (!byId && client.name.match(accessor))) {
                 return client
             }
         }
@@ -89,10 +89,10 @@ const loadServer = (cfg, context) => {
         const loader = new PluginLoader(server)
     
         server.connect()
-        .then(() => {
-            server.start()
+        .then(async () => {
+            await server.start()
             loader.onLoad()
-            io.print(`^2Connected^7 to '^3${cfg.game}^7' server at ^3${cfg.host}:${cfg.port}`)
+            io.print(`^2Connected^7 to '^3${cfg.game}^7' server (^5${server.hostname}^7) at ^3${cfg.host}:${cfg.port}`)
             resolve()
         })
         .catch((e) => {

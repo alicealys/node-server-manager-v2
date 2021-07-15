@@ -96,8 +96,8 @@ const createHandshakePacket = (host, port) => {
 
 const parser = {
     commandTemplates: {
-        tell: 'tellraw {0} {\"text\": \"{1}\"}',
-        broadcast: 'tellraw {0} {\"text\": \"{1}\"}',
+        tell: 'tellraw {0} "{1}"',
+        broadcast: 'tellraw @a "{0}"',
     },
     colors: {
         'white': '§f',
@@ -108,12 +108,15 @@ const parser = {
         'purple': '§d',
         'default': '§f',
     },
+    dvarOverrides: {
+
+    }
 }
 
 class Rcon {
-    constructor(config) {
+    constructor(server, config) {
+        this.server = server
         this.config = config
-
         this.parser = parser
 
         this.packetId = 0
@@ -224,6 +227,23 @@ class Rcon {
         }
 
         return players
+    }
+
+    async getDvar(name) {
+        name = name.toLowerCase()
+        const ping = await this.ping()
+        switch (name) {
+            case 'sv_hostname':
+                return ping.description.text
+            case 'sv_maxclients':
+                return ping.players.max
+            case 'version':
+                return ping.version.name
+        }
+    }
+
+    async setDvar() {
+        
     }
 
     command(command) {

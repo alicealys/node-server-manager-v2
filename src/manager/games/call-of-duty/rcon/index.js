@@ -6,8 +6,11 @@ const fs     = require('fs')
 const path   = require('path')
 
 class Rcon {
-    constructor(config) {
+    constructor(server, config) {
+        this.server = server
         this.config = config
+
+        this.commandRetries = 5
 
         if (!config.gamename) {
             throw new Error('Gamename not defined')
@@ -57,17 +60,42 @@ class Rcon {
         })
     }
 
-    command(command) {
+    async getDvar(name) {
+        const result = await this.command(string.format(this.parser.commandTemplates.getDvar, name))
+        const match = this.parser.dvarRegex.exec(result)
+        if (result && match) {
+            return match[3]
+        }
+
+        return false
+    }
+
+    async setDvar(name, value) {
+        return await this.command(string.format(this.parser.commandTemplates.setDvar, name, value))
+    }
+
+    async command(command) {
+        for (var i = 0; i < this.commandRetries; i++) {
+            const result = await this.commandInternal(command)
+            if (result) {
+                return result
+            }
+
+            await delay(100)
+        }
+    }
+
+    commandInternal(command) {
         return new Promise(async (_resolve, _reject) => {
             const sync = this.parser.commandDelay
-            if (sync) {
+            if (sync != undefined) {
                 await this.mutex.lock()
             }
 
             const resolve = async (value) => {
                 _resolve(value)
 
-                if (sync) {
+                if (sync != undefined) {
                     await delay(sync)
                     this.mutex.unlock()
                 }

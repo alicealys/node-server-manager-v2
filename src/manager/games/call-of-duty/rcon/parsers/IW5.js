@@ -2,8 +2,11 @@ module.exports = {
     commandTemplates: {
         status: 'status',
         tell: 'tell {0} \"{1}\"',
-        broadcast: 'say {0}'
+        broadcast: 'say {0}',
+        setDvar: 'set {0} "{1}"',
+        getDvar: 'get {0}'
     },
+    dvarRegex: /(.*?) +(is:|is) +\"(.*?)\"/g,
     rconCommandFormat: '\xff\xff\xff\xffrcon {0} {1}',
     parseStatus: (match) => {
         const address = match[7].split(':')

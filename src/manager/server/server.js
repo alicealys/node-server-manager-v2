@@ -6,12 +6,11 @@ class Server extends EventEmitter {
         super()
         this.config = config
 
-        this.dvars = {}
         this.commands = []
         this.clients = []
         this.dvars = {}
 
-        this.rcon = new (require(`../games/${config.game}/rcon`))(config)
+        this.rcon = new (require(`../games/${config.game}/rcon`))(this, config)
         this.log = new (require(`../games/${config.game}/log`))(this, config)
 
         const keys = Object.keys(context)
@@ -41,6 +40,16 @@ class Server extends EventEmitter {
     }
 
     async start() {
+        this.dvars['sv_hostname'] = await this.rcon.getDvar('sv_hostname')
+        this.dvars['sv_maxclients'] = await this.rcon.getDvar('sv_maxclients')
+        this.dvars['mapname'] = await this.rcon.getDvar('mapname')
+        this.dvars['g_gametype'] = await this.rcon.getDvar('g_gametype')
+        this.dvars['gamename'] = await this.rcon.getDvar('gamename')
+        this.dvars['version'] = await this.rcon.getDvar('version')
+
+        this.hostname = this.dvars['sv_hostname']
+        this.maxClients = this.dvars['sv_maxclients']
+
         const players = await this.rcon.playerList()
 
         for (var i = 0; i < players.length; i++) {

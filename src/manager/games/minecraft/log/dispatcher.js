@@ -14,6 +14,7 @@ class Dispatcher {
             case 'connect':
                 {
                     const name = event.args[0]
+                    const address = event.args[1].split(':')
                     const list = await this.server.rcon.playerList()
                     const player = list.find(player => player.name == name)
     
@@ -26,7 +27,7 @@ class Dispatcher {
                         name: player.name,
                         slot: player.name,
                         server: this.server,
-                        address: null
+                        address: address[0]
                     })
                     await client.build()
 
