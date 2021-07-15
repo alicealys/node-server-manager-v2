@@ -1,5 +1,6 @@
 const net    = require('net')
 const Mutex  = require('../../../../utils/mutex')
+const string = require('../../../../utils/string')
 
 const PacketTypes = {
     Auth: 3,
@@ -39,7 +40,7 @@ const parser = {
         getDvar: '{0}'
     },
     dvarOverrides: {
-        'gametype': {
+        'g_gametype': {
             get: {
                 name: 'game_type'
             },
@@ -47,11 +48,19 @@ const parser = {
                 name: 'game_type'
             }
         },
+        'sv_hostname': {
+            get: {
+                name: 'hostname'
+            },
+            set: {
+                name: 'hostname'
+            }
+        },
         'sv_maxclients': {
             get: {
                 type: 'function',
                 callback: async (rcon) => {
-                    const status = await rcon.command(this.parser.commandTemplates.status)
+                    const status = await rcon.command(rcon.parser.commandTemplates.status)
                     const split = status.split('\n')
 
                     for (const line of split) {
@@ -67,8 +76,14 @@ const parser = {
             get: {
                 type: 'function',
                 callback: async (rcon) => {
-                    const result = await rcon.getDvar('host_map', true)
-                    return result.split('.')[0]
+                    const result = await rcon.command(string.format(rcon.parser.commandTemplates.getDvar, 'mapname'))
+                    const match = rcon.parser.dvarRegex.exec(result)
+
+                    if (result && match) {
+                        return match[2].split('.')[0]
+                    }
+            
+                    return false
                 }
             }
         }
@@ -225,7 +240,7 @@ class Rcon {
         return players
     }
 
-    getDvar(name, ignoreOverride = false) {
+    async getDvar(name, ignoreOverride = false) {
         name = name.toLowerCase()
 
         const override = this.parser.dvarOverrides[name]
@@ -243,6 +258,7 @@ class Rcon {
 
         const result = await this.command(string.format(this.parser.commandTemplates.getDvar, name))
         const match = this.parser.dvarRegex.exec(result)
+
         if (result && match) {
             return match[2]
         }
@@ -250,7 +266,7 @@ class Rcon {
         return false
     }
 
-    setDvar(name, value, ignoreOverride = false) {
+    async setDvar(name, value, ignoreOverride = false) {
         name = name.toLowerCase()
 
         const override = this.parser.dvarOverrides[name]

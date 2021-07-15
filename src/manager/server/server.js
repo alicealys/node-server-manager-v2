@@ -44,7 +44,6 @@ class Server extends EventEmitter {
         this.dvars['sv_maxclients'] = await this.rcon.getDvar('sv_maxclients')
         this.dvars['mapname'] = await this.rcon.getDvar('mapname')
         this.dvars['g_gametype'] = await this.rcon.getDvar('g_gametype')
-        this.dvars['gamename'] = await this.rcon.getDvar('gamename')
         this.dvars['version'] = await this.rcon.getDvar('version')
 
         this.hostname = this.dvars['sv_hostname']
