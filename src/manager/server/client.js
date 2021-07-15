@@ -5,6 +5,8 @@ class Client extends EventEmitter {
     constructor(fields) {
         super()
 
+        this.inGame = true
+
         const keys = Object.keys(fields)
         keys.forEach(key => {
             this[key] = fields[key]

@@ -4,8 +4,13 @@
     "CMD_COMMAND_DESCRIPTION": "{0}, usage: <yellow>{1}",
     "CMD_MISSING_ARGUMENTS": "Insufficient arguments, usage: <yellow>{0}",
 
-    "CMD_FIND_RESULT": "<blue>{0}<default> | <blue>@{1}<default> | Active: <blue>{2}<default>",
+    "CMD_FIND_RESULT": "<blue>{0}<default> | <blue>@{1}<default> | <blue>{2}<default> | Active: <blue>{3}<default>",
+    "CMD_FIND_NO_RESULTS": "Player not found",
     "CMD_HELP_PAGE_FORMAT": "---- Page <yellow>{0}<default> / <yellow>{1}<default> ----",
+    "CMD_ADDROLE_ALREADY_SET": "Client already has that role",
+    "CMD_ADDROLE_NOT_FOUND": "Role not found",
+    "CMD_ADDROLE_HIERARCHY_ERROR": "You cannot set that role",
+
 
     "NOT_DEFINED": "Not defined",
 

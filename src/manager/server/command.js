@@ -45,6 +45,26 @@ const getRoles = () => {
         })
     }
 
+    if (!currentRoles.find(role => role.id == 'role_owner')) {
+        currentRoles.push({
+            id: "role_owner",
+            name: "Owner",
+            permissions: [
+                "*"
+            ]
+        })
+    }
+
+    if (!currentRoles.find(role => role.id == 'role_console')) {
+        currentRoles.push({
+            id: "role_console",
+            name: "Console",
+            permissions: [
+                "*"
+            ]
+        })
+    }
+
     return currentRoles
 }
 
@@ -106,6 +126,7 @@ module.exports = {
         constructor() {
             this.params = []
             this.minArgs = 0
+            this.inGame = false
         }
         setName(name) {
             this.name = name.toLowerCase()
@@ -147,6 +168,11 @@ module.exports = {
 
             return this
         }
+        setInGame(value) {
+            this.inGame = value
+
+            return this
+        }
         getUsage() {
             if (this.usage) {
                 return string.format(this.usage, config.current.commandPrefix)
@@ -168,6 +194,12 @@ module.exports = {
             }
 
             return localization['NOT_DEFINED']
+        }
+        noPermission(client) {
+            client.tell(string.format(localization['CMD_MISSING_PERMISSION'], this.permission))
+        }
+        missingArguments(client) {
+            client.tell(string.format(localization['CMD_MISSING_ARGUMENTS'], this.getUsage()))
         }
         execute(client, args) {
             for (var i = 0; i < args; i++) {
@@ -199,7 +231,7 @@ module.exports = {
                 return buffer
             }
 
-            this.callback(client, args)
+            this.callback(client, args, this)
         }
     }
 }

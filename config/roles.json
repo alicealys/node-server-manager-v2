@@ -1,7 +1,15 @@
 [
     {
+        "id": "role_console",
+        "name": "Console",
+        "permissions": [
+            "*"
+        ]
+    },
+    {
         "id": "role_owner",
         "name": "Owner",
+        "color": "red",
         "permissions": [
             "*"
         ]

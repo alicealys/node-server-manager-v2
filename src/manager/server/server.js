@@ -28,6 +28,7 @@ class Server extends EventEmitter {
         }
 
         this.commands.push(command)
+        this.emit('updated_commands')
     }
 
     emit(event, ...args) {

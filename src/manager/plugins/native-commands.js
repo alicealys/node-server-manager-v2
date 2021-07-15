@@ -5,31 +5,35 @@ const string       = require('../../utils/string')
 const array        = require('../../utils/array')
 
 const plugin = {
-    onMessage: (client, message) => {
-    },
-    onConnect: (client) => {
-    },
-    onPreconnect: (client) => {
-    },
-    onDisconnect: (client) => {
-    },
-    onEvent: (event, args) => {
-    },
-    onLoad: (server) => {
+    onLoad: async (server) => {
         const database = server.database
 
         server.addCommand(
             new commandUtils.CommandBuilder()
             .setName('find')
+            .setAlias('f')
             .setMinArgs(1)
             .setPermission('query.findclient')
-            .setCallback(async (client, args) => {
-                const name = args.join(1)
-                const result = await database.models.connections.findByName(name, 10)
+            .setCallback(async (client, args, command) => {
+                const name = args.join(1).replace(new RegExp('%', 'g'), '')
+                if (!name.length) {
+                    command.missingArguments(client)
+                    return
+                }
+
+                const result = await database.models.connections.findByName(name, client.inGame ? 50 : 10)
                 
+                if (!result.length) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                }
+
                 for (var i = 0; i < result.length; i++) {
-                    await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, result[i].date))
-                    await delay(500)
+                    const resultClient = await database.models.clients.get(result[i].clientId)
+                    const role = commandUtils.getRole(JSON.parse(resultClient.roles))
+                    const roleName = role.color ? `<${role.color}>${role.name}<default>` : role.name
+
+                    await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, roleName, result[i].date))
+                    client.inGame && await delay(500)
                 }
             })
         )
@@ -37,6 +41,7 @@ const plugin = {
         server.addCommand(
             new commandUtils.CommandBuilder()
             .setName('help')
+            .setAlias('h')
             .setPermission('user.help')
             .setCallback(async (client, args) => {
                 const role = commandUtils.getRole(client.roles)
@@ -64,8 +69,50 @@ const plugin = {
                 await client.tell(string.format(localization['CMD_HELP_PAGE_FORMAT'], page + 1, chunks.length))
                 for (var i = 0; i < chunks[page].length; i++) {
                     client.tell(string.format(localization['CMD_COMMAND_DESCRIPTION'], chunks[page][i].getDescription(), chunks[page][i].getUsage()))
-                    await delay(500)
+                    client.inGame && await delay(500)
                 }
+            })
+        )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('addrole')
+            .setAlias('ar')
+            .setPermission('managment.addrole')
+            .setMinArgs(2)
+            .setCallback(async (client, args) => {
+                const roleName = args[1].toLowerCase()
+                const accessor = args.join(2)
+
+                const found = await database.getClient(accessor)
+                if (!found) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                    return
+                }
+
+                found.roles = JSON.parse(found.roles)
+
+                const roles = commandUtils.getRoles()
+                const role = roles.find(role => role.id.toLowerCase() == roleName || role.name.toLowerCase() == roleName)
+
+                const currentRole = commandUtils.getRole(client.roles)
+
+                if (currentRole.index >= role.index) {
+                    client.tell(localization['CMD_ADDROLE_HIERARCHY_ERROR'])
+                    return
+                }
+
+                if (!role) {
+                    client.tell(localization['CMD_ADDROLE_NOT_FOUND'])
+                    return
+                }
+
+                if (found.roles.find(_role => _role.toLowerCase() == role.id.toLowerCase() || _role.toLowerCase() == role.name.toLowerCase())) {
+                    client.tell(localization['CMD_ADDROLE_ALREADY_SET'])
+                    return
+                }
+
+                database.models.clients.addRole(found.clientId, role.id)
             })
         )
     }

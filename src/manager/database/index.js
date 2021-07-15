@@ -23,7 +23,7 @@ instance.connect = () => {
             instance.sequelize = sequelize
             instance.models = {}
         
-            fs.readdir(directory, (err, files) => {
+            fs.readdir(directory, async (err, files) => {
                 if (err) {
                     reject(new Error('Unable to scan directory'))
                     return
@@ -37,10 +37,45 @@ instance.connect = () => {
                     instance.models[name] = model
                 })
 
+                await instance.initialize()
+
                 resolve(instance)
             })
         })
     })
+}
+
+instance.initialize = async () => {
+    var result = await instance.models.clients.find('__console__')
+    if (result) {
+        instance.consoleId = result.consoleId
+        return
+    }
+
+    result = await instance.models.clients.add('__console__', ['role_console'])
+    await instance.models.connections.add({
+        clientId: result.clientId,
+        uniqueId: '__console__',
+        name: 'Console',
+        address: '0.0.0.0'
+    })
+    
+    instance.consoleId = result.clientId
+}
+
+instance.getClient = async (accessor) => {
+    if (accessor[0] == '@') {
+        const clientId = parseInt(accessor.substr(1))
+        const result = await instance.models.clients.get(clientId)
+        return result
+    } else {
+        const result = await instance.models.connections.findByName(accessor, 1)
+        if (!result.length) {
+            return null
+        }
+
+        return await instance.models.clients.get(result[0].clientId)
+    }
 }
 
 module.exports = instance

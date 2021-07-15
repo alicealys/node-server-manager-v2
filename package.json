@@ -21,6 +21,7 @@
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "sequelize": "^6.6.5",
+    "serverline": "^1.5.0",
     "sqlite3": "^5.0.2",
     "tail": "^2.2.3",
     "varint": "^6.0.0"
