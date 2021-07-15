@@ -1,4 +1,6 @@
 const net    = require('net')
+const fs     = require('fs')
+const path   = require('path')
 const Mutex  = require('../../../../utils/mutex')
 const string = require('../../../../utils/string')
 
@@ -31,83 +33,20 @@ const decodePacket = (buffer) => {
     return {id, type, payload}
 }
 
-const parser = {
-    commandTemplates: {
-        status: 'status',
-        tell: 'say [{0}] {1}',
-        broadcast: 'say {0}',
-        setDvar: '{0} "{1}"',
-        getDvar: '{0}'
-    },
-    dvarOverrides: {
-        'g_gametype': {
-            get: {
-                name: 'game_type'
-            },
-            set: {
-                name: 'game_type'
-            }
-        },
-        'sv_hostname': {
-            get: {
-                name: 'hostname'
-            },
-            set: {
-                name: 'hostname'
-            }
-        },
-        'sv_maxclients': {
-            get: {
-                type: 'function',
-                callback: async (rcon) => {
-                    const status = await rcon.command(rcon.parser.commandTemplates.status)
-                    const split = status.split('\n')
-
-                    for (const line of split) {
-                        const match = rcon.parser.playersRegex.exec(line)
-                        if (match) {
-                            return match[3]
-                        }
-                    }
-                }
-            }
-        },
-        'mapname': {
-            get: {
-                type: 'function',
-                callback: async (rcon) => {
-                    const result = await rcon.command(string.format(rcon.parser.commandTemplates.getDvar, 'mapname'))
-                    const match = rcon.parser.dvarRegex.exec(result)
-
-                    if (result && match) {
-                        return match[2].split('.')[0]
-                    }
-            
-                    return false
-                }
-            }
-        }
-    },
-    colors: {
-        'white': '\x01',
-        'red': '\x07',
-        'green': '\x06',
-        'yellow': '\x10',
-        'blue': '\x0B',
-        'purple': '\x0D',
-        'default': '\x01',
-    },
-    statusRegex: /# +(\d+) +(\d+) +"(.+)" (\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)/g,
-    statusRegexBot: /#(\d+) +"(.+)" +(\S+) +(\S+) +(\d+)/g,
-    dvarRegex: /"(.+)" = "(.+)" (?:\( def. "(.*)" \))?(?: |\\w) +- (.+)/g,
-    playersRegex: /players *: +(\d)+ humans, (\d)+ bots \((\d+).+/g,
-}
-
 class Rcon {
     constructor(server, config) {
         this.server = server
         this.config = config
-        this.parser = parser
+
+        if (!config.gamename) {
+            config.gamename = 'csgo'
+        }
+        
+        if (!fs.existsSync(path.join(__dirname, `./parsers/${config.gamename.toLowerCase()}.js`))) {
+            throw new Error('Game not supported')
+        }
+
+        this.parser = require(`./parsers/${config.gamename.toLowerCase()}`)
 
         this.packetId = 0
 
@@ -173,7 +112,6 @@ class Rcon {
             })
 
             const timeout = setTimeout(() => {
-                console.log('timed out')
                 this.socket.removeListener('error', onError)
                 this.socket.removeListener('data', onData)
             }, 1000)
@@ -213,27 +151,11 @@ class Rcon {
 
             if (line.match(this.parser.statusRegexBot)) {
                 const match = this.parser.statusRegexBot.exec(line)
-
-                players.push({
-                    name: match[2],
-                    uniqueId: match[2],
-                    slot: parseInt(match[1]),
-                    address: '0.0.0.0'
-                })
+                players.push(this.parser.parseBotStatus(match))
             }
             else if (line.match(this.parser.statusRegex)) {
                 const match = this.parser.statusRegex.exec(line)
-                const address = match[10]
-
-                players.push({
-                    name: match[3],
-                    uniqueId: match[4],
-                    time: match[5],
-                    ping: parseInt(match[6]),
-                    address: address[0],
-                    port: address[1],
-                    slot: parseInt(match[1])
-                })
+                players.push(this.parser.parseStatus(match))
             }
         })
 

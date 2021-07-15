@@ -83,22 +83,28 @@ process.on('exit', () => {
 
 const loadServer = (cfg, context) => {
     return new Promise((resolve, reject) => {
-        const server = new Server({...globalConfig, ...cfg}, context)
-        servers.push(server)
+        try {
+            const server = new Server({...globalConfig, ...cfg}, context)
+            servers.push(server)
+            
+            const loader = new PluginLoader(server)
         
-        const loader = new PluginLoader(server)
-    
-        server.connect()
-        .then(async () => {
-            await server.start()
-            loader.onLoad()
-            io.print(`^2Connected^7 to '^3${cfg.game}^7' server (^5${server.hostname}^7) at ^3${cfg.host}:${cfg.port}`)
-            resolve()
-        })
-        .catch((e) => {
+            server.connect()
+            .then(async () => {
+                await server.start()
+                loader.onLoad()
+                io.print(`^2Connected^7 to '^3${cfg.game}^7' server (^5${server.hostname}^7) at ^3${cfg.host}:${cfg.port}`)
+                resolve()
+            })
+            .catch((e) => {
+                handleConnectError(cfg, e)
+                resolve()
+            })
+        }
+        catch (e) {
             handleConnectError(cfg, e)
             resolve()
-        })
+        }
     })
 }
 
