@@ -3,6 +3,10 @@ const delay        = require('delay')
 const localization = require('../../utils/localization')
 const string       = require('../../utils/string')
 const array        = require('../../utils/array')
+const io           = require('../../utils/io')
+const path         = require('path')
+
+const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
 const plugin = {
     onLoad: async (server) => {
@@ -55,11 +59,16 @@ const plugin = {
                     const commandName = args[1].toLowerCase()
                     const command = commands.find(command => command.name.startsWith(commandName))
                     if (!command) {
-                        client.tell(string.format(localization['CMD_COMMAND_NOT_FOUND']))
+                        client.tell(string.format(localization['CMD_COMMAND_NOT_FOUND'], `${config.commandPrefix}help`))
                         return
                     }
 
-                    client.tell(string.format(localization['CMD_COMMAND_DESCRIPTION'], command.getDescription(), command.getUsage()))
+                    client.tell(string.format(localization['CMD_COMMAND_DESCRIPTION'], 
+                        command.name,
+                        command.alias ? `(${command.alias})` : '',
+                        command.getDescription(),
+                        command.getUsage()
+                    ))
 
                     return
                 } else if (args.length > 1) {
@@ -68,7 +77,14 @@ const plugin = {
 
                 await client.tell(string.format(localization['CMD_HELP_PAGE_FORMAT'], page + 1, chunks.length))
                 for (var i = 0; i < chunks[page].length; i++) {
-                    client.tell(string.format(localization['CMD_COMMAND_DESCRIPTION'], chunks[page][i].getDescription(), chunks[page][i].getUsage()))
+                    client.tell(string.format(
+                        localization['CMD_COMMAND_DESCRIPTION'], 
+                        chunks[page][i].name,
+                        chunks[page][i].alias ? ` (${chunks[page][i].alias})` : '',
+                        chunks[page][i].getDescription(),
+                        chunks[page][i].getUsage()
+                    ))
+
                     client.inGame && await delay(500)
                 }
             })

@@ -189,7 +189,7 @@ module.exports = {
                 return this.description
             }
 
-            if (localization.commands[this.name].description) {
+            if (localization.commands && localization.commands[this.name] && localization.commands[this.name].description) {
                 return localization.commands[this.name].description
             }
 

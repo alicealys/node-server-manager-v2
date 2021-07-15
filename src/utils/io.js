@@ -16,13 +16,23 @@ module.exports = {
     },
     ConfigWatcher: class {
         constructor(path) {
-            this.current = JSON.parse(fs.readFileSync(path).toString())
+            var current = JSON.parse(fs.readFileSync(path).toString())
             fs.watch(path, (eventType, filename) => {
                 try {
                     const json = JSON.parse(fs.readFileSync(path).toString())
-                    this.current = json
+                    current = json
                 }
                 catch (e) {}
+            })
+
+            return new Proxy({}, {
+                get: (target, name) => {
+                    if (name == 'current') {
+                        return current
+                    }
+
+                    return current[name]
+                }
             })
         }
     },

@@ -6,6 +6,6 @@ const localization     = new io.ConfigWatcher(localizationPath)
 
 module.exports = new Proxy(localization, {
     get: (target, name) => {
-        return target.current[name] || name
+        return target[name] || name
     }
 })

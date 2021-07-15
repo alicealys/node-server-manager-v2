@@ -1,6 +1,7 @@
 const path         =  require('path')
 const io           = require('../../utils/io')
-const localization = require('../../utils/io')
+const string       = require('../../utils/string')
+const localization = require('../../utils/localization')
 const rl           = require('serverline')
 
 const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
@@ -22,6 +23,10 @@ rl.on('line', (cmd) => {
         return
     }
 
+    if (cmd.startsWith(config.commandPrefix)) {
+        cmd = cmd.substr(config.commandPrefix.length)
+    }
+
     const args = cmd.trim().split(/\s+/g)
     const name = args[0]
 
@@ -38,7 +43,7 @@ rl.on('line', (cmd) => {
     }
 
     if (!commands[name]) {
-        io.print(string.format(localization['CMD_COMMAND_NOT_FOUND'], `${config.commandPrefix}help`))
+        io.print(parseColors(string.format(localization['CMD_COMMAND_NOT_FOUND'], `${config.commandPrefix}help`)))
         return
     }
     
@@ -77,7 +82,7 @@ const addServerCommands = (server) => {
         const callback = async (args) => {
             const client = {
                 clientId: server.database.consoleId,
-                roles: ['role_owner'],
+                roles: ['role_console'],
                 inGame: false,
                 tell: (msg) => {
                     io.print(parseColors(msg.trim()))
