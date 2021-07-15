@@ -50,7 +50,7 @@ const parser = {
         'sv_maxclients': {
             get: {
                 type: 'function',
-                callback: (rcon) => {
+                callback: async (rcon) => {
                     const status = await rcon.command(this.parser.commandTemplates.status)
                     const split = status.split('\n')
 
@@ -66,7 +66,7 @@ const parser = {
         'mapname': {
             get: {
                 type: 'function',
-                callback: (rcon) => {
+                callback: async (rcon) => {
                     const result = await rcon.getDvar('host_map', true)
                     return result.split('.')[0]
                 }
