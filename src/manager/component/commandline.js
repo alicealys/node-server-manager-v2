@@ -83,6 +83,7 @@ const addServerCommands = (server) => {
             const client = {
                 clientId: server.database.consoleId,
                 roles: ['role_console'],
+                server: server,
                 inGame: false,
                 tell: (msg) => {
                     io.print(parseColors(msg.trim()))

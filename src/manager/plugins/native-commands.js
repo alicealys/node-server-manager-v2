@@ -65,7 +65,7 @@ const plugin = {
 
                     client.tell(string.format(localization['CMD_COMMAND_DESCRIPTION'], 
                         command.name,
-                        command.alias ? `(${command.alias})` : '',
+                        command.alias ? ` (${command.alias})` : '',
                         command.getDescription(),
                         command.getUsage()
                     ))
@@ -112,6 +112,11 @@ const plugin = {
                 const role = roles.find(role => role.id.toLowerCase() == roleName || role.name.toLowerCase() == roleName)
 
                 const currentRole = commandUtils.getRole(client.roles)
+
+                const target = server.manager.clients.find(client => client.clientId == found.clientId)
+                if (target) {
+                    target.roles.push(role.id)
+                }
 
                 if (currentRole.index >= role.index) {
                     client.tell(localization['CMD_ADDROLE_HIERARCHY_ERROR'])

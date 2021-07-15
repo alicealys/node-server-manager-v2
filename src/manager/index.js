@@ -44,7 +44,18 @@ const manager = {
         version,
         commitId,
         lastCommitId
-    }
+    },
+    get clients() {
+        const clients = []
+        
+        for (const server of servers) {
+            for (const client of server.clients) {
+                clients.push(client)
+            } 
+        }
+
+        return clients
+    },
 }
 
 const loader = new Loader(manager)
@@ -79,7 +90,7 @@ const loadServer = (cfg, context) => {
     await database.connect()
 
     for (const cfg of config.servers) {
-        await loadServer(cfg, {database})
+        await loadServer(cfg, {database, manager})
     }
 
     loader.onLoad(manager)
