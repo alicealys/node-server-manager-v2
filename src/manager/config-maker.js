@@ -1,6 +1,7 @@
-const path = require('path')
-const fs   = require('fs')
-const io   = require('../utils/Io')
+const path     = require('path')
+const fs       = require('fs')
+const io       = require('../utils/Io')
+const Writable = require('stream').Writable
 
 if (fs.existsSync(path.join(__dirname, '../../config/config.json'))) {
     module.exports = new Promise((resolve, reject) => {
@@ -75,6 +76,7 @@ const questions = [
     },
     {
         text: `Database ^6password^7: `,
+        hidden: true,
         show: () => {
             return config.database.dialect != 'sqlite'
         },
@@ -155,6 +157,7 @@ const questions = [
     },
     {
         text: 'Server ^6rcon password^7: ',
+        hidden: true,
         callback: (value) => {
             if (!value) {
                 return false
@@ -165,7 +168,7 @@ const questions = [
         }
     },
     {
-        text: 'Server ^6log path^7 (^1folder path for source games^7): ',
+        text: 'Server ^6log path^7 (^2folder path for source games^7): ',
         callback: (value) => {
             if (!value) {
                 return false
@@ -247,6 +250,14 @@ module.exports = new Promise((resolve, reject) => {
         output: process.stdout
     })
 
+    rl._writeToOutput = (string) => {
+        if (string.includes('\r')) {
+            rl.muted = false
+        }
+
+        rl.output.write(rl.muted ? '*' : string)
+    }
+
     const askQuestion = (index) => {
         var question = questions[index]
 
@@ -272,6 +283,10 @@ module.exports = new Promise((resolve, reject) => {
                 ? askQuestion(nextIndex)
                 : askQuestion(index)
         })
+
+        if (question.hidden) {
+            rl.muted = true
+        }
     }
 
     askQuestion(0)
