@@ -36,6 +36,8 @@ require('./config-maker')
 
         if (process.env.NODE_ENV == 'development') {
             console.log(`Caught unhandled exception: ${err.stack}`)
+        } else {
+            console.log('An error has occurred, check the logs for more information')
         }
     })
     
