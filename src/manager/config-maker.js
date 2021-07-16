@@ -1,7 +1,6 @@
 const path     = require('path')
 const fs       = require('fs')
-const io       = require('../utils/Io')
-const Writable = require('stream').Writable
+const io       = require('../utils/io')
 
 if (fs.existsSync(path.join(__dirname, '../../config/config.json'))) {
     module.exports = new Promise((resolve, reject) => {
