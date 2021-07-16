@@ -20,8 +20,8 @@ class Log {
             }
         }
 
-        if (!fs.existsSync(config.logPath) || !fs.lstatSync(config.logPath).isDirectory()) {
-            return
+        if (!fs.lstatSync(config.logPath).isDirectory()) {
+            throw new Error('Log path must be a folder')
         }
 
         var currentFile = null

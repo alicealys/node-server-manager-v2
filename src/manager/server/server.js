@@ -1,5 +1,6 @@
-const Client = require('./client')
+const Client       = require('./client')
 const EventEmitter = require('events')
+const fs           = require('fs')
 
 class Server extends EventEmitter {
     constructor(config, context) {
@@ -9,6 +10,10 @@ class Server extends EventEmitter {
         this.commands = []
         this.clients = []
         this.dvars = {}
+
+        if (!fs.existsSync(config.logPath)) {
+            throw new Error('Log path does not exist')
+        }
 
         this.rcon = new (require(`../games/${config.game}/rcon`))(this, config)
         this.log = new (require(`../games/${config.game}/log`))(this, config)
