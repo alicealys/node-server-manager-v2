@@ -7,6 +7,7 @@ require('./config-maker')
     const database      = require('./database')
     const fs            = require('fs')
     const path          = require('path')
+    const EventEmitter  = require('events')
     
     process.env.locale = config.locale || 'en'
     if (process.env.NODE_ENV != 'production' && process.env.NODE_ENV != 'development') {
@@ -61,17 +62,19 @@ require('./config-maker')
         io.print(`Failed to initialize '^3${cfg.game}^7' server at ^3${cfg.host}:${cfg.port}^7: ^1${e}`)
     }
     
-    const manager = {
-        config,
-        servers,
-        database,
-        version: {
-            hash,
-            version,
-            commitId,
-            lastCommitId
-        },
-        get clients() {
+    const manager = new EventEmitter()
+    manager.config = config
+    manager.servers = servers
+    manager.database = database
+    manager.commands = []
+    manager.version = {
+        hash,
+        version,
+        commitId,
+        lastCommitId
+    }
+    Object.defineProperty(manager, 'clients', {
+        get: () => {
             const clients = []
             
             for (const server of servers) {
@@ -81,23 +84,23 @@ require('./config-maker')
             }
     
             return clients
-        },
-        getClient: async (accessor) => {
-            if (!accessor || accessor.length == 0) {
-                return null
+        }
+    })
+    manager.getClient = async (accessor) => {
+        if (!accessor || accessor.length == 0) {
+            return null
+        }
+
+        const byId = accessor[0] == '@'
+        const clientId = parseInt(accessor.substr(1))
+
+        for (const client of manager.clients) {
+            if ((byId && clientId == client.clientId) || (!byId && client.name.match(accessor))) {
+                return client
             }
-    
-            const byId = accessor[0] == '@'
-            const clientId = parseInt(accessor.substr(1))
-    
-            for (const client of manager.clients) {
-                if ((byId && clientId == client.clientId) || (!byId && client.name.match(accessor))) {
-                    return client
-                }
-            }
-    
-            return await database.getClient(accessor)
-        },
+        }
+
+        return await database.getClient(accessor)
     }
     
     const loader = new Loader(manager)
@@ -112,24 +115,24 @@ require('./config-maker')
             try {
                 const server = new Server({...globalConfig, ...cfg}, context)
                 servers.push(server)
-                
+                resolve()
+
                 const loader = new PluginLoader(server)
-            
+
                 server.connect()
                 .then(async () => {
                     await server.start()
                     loader.onLoad()
+                    server.loaded = true
+                    server.emit('loaded')
                     io.print(`^2Now watching^7 '^3${cfg.game}^7' server (^5${server.hostname}^7) at ^3${cfg.host}:${cfg.port}`)
-                    resolve()
                 })
                 .catch((e) => {
                     handleConnectError(cfg, e)
-                    resolve()
                 })
             }
             catch (e) {
                 handleError(cfg, e)
-                resolve()
             }
         })
     }

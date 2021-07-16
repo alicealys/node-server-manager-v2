@@ -33,6 +33,11 @@ class Rcon {
                 return
             }
 
+            if (result.trim().endsWith('Invalid rcon password') || result.trim().endsWith('Invalid password')) {
+                reject(new Error('Invalid rcon password'))
+                return
+            }
+
             resolve()
         })
     }
@@ -44,15 +49,16 @@ class Rcon {
                 return false
             }
 
-            const lines = status.split('\n').slice(1, -1)
+            const lines = status.trim().split('\n')
             const players = []
     
             lines.forEach(line => {
-                if (!line.match(this.parser.statusRegex)) {
+                var match = this.parser.statusRegex.exec(line)
+                if (!match) {
                     return
                 }
 
-                const match = this.parser.statusRegex.exec(line).map(x => x.trim())
+                match = match.map(x => x.trim())
                 players.push(this.parser.parseStatus(match))
             })
 
@@ -75,6 +81,12 @@ class Rcon {
     }
 
     async command(command) {
+        const commandName = command.split(/\s+/g)[0]
+        if (this.parser.ignoreCommandResponses && this.parser.ignoreCommandResponses.includes(commandName)) {
+            this.commandInternal(command)
+            return
+        }
+
         for (var i = 0; i < this.commandRetries; i++) {
             const result = await this.commandInternal(command)
             if (result) {
@@ -131,7 +143,6 @@ class Rcon {
             socket.once('message', (data) => {
                 end()
                 clearTimeout(timeout)
-
                 resolve(data.toString())
             })
 

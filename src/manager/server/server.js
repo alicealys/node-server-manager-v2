@@ -1,11 +1,13 @@
 const Client       = require('./client')
 const EventEmitter = require('events')
 const fs           = require('fs')
+const string       = require('../../utils/string')
 
 class Server extends EventEmitter {
     constructor(config, context) {
         super()
         this.config = config
+        this.loaded = false
 
         this.commands = []
         this.clients = []
@@ -31,8 +33,17 @@ class Server extends EventEmitter {
             }
         }
 
+        for (var i = 0; i < this.manager.commands.length; i++) {
+            if (this.manager.commands[i].name == command.name) {
+                this.manager.commands.splice(i, 1)
+            }
+        }
+
         this.commands.push(command)
+        this.manager.commands.push(command)
+
         this.emit('updated_commands')
+        this.manager.emit('updated_commands')
     }
 
     emit(event, ...args) {
@@ -54,6 +65,10 @@ class Server extends EventEmitter {
         this.hostname = this.dvars['sv_hostname']
         this.maxClients = this.dvars['sv_maxclients']
 
+        if (!this.hostname) {
+            throw new Error('Unable to get server dvars')
+        }
+
         const players = await this.rcon.playerList()
 
         for (var i = 0; i < players.length; i++) {
@@ -68,8 +83,7 @@ class Server extends EventEmitter {
     }
 
     broadcast(message) {
-        const command = this.rcon.commandTemplates.broadcast(message)
-        this.rcon.command(command)
+        this.rcon.command(string.format(this.rcon.parser.commandTemplates.say, message))
     }
 }
 

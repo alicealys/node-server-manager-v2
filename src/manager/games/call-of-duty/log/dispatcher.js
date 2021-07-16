@@ -36,7 +36,7 @@ class Dispatcher {
                         name: name, 
                         slot: slot, 
                         server: this.server,
-                        address: player.address
+                        address: player ? player.address : null
                     })
                     await client.build()
 
@@ -68,7 +68,7 @@ class Dispatcher {
                 {
                     const slot = parseInt(event.args[3])
                     const client = this.server.clients.find(client => client.slot == slot)
-                    const message = event.args[5].trim()
+                    const message = event.args[5].trim().replace(/[^\x20-\x7E]+/g, '')
     
                     if (!client) {
                         return

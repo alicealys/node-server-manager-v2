@@ -97,7 +97,8 @@ const createHandshakePacket = (host, port) => {
 const parser = {
     commandTemplates: {
         tell: 'tellraw {0} "{1}"',
-        broadcast: 'tellraw @a "{0}"',
+        say: 'tellraw @a "{0}"',
+        kick: 'kick {0} "{1}"',
     },
     colors: {
         'white': '§f',

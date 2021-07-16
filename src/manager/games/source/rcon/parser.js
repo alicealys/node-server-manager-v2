@@ -5,7 +5,8 @@ module.exports = {
     commandTemplates: {
         status: 'status',
         tell: 'say [{0}] {1}',
-        broadcast: 'say {0}',
+        say: 'say {0}',
+        kick: 'kick {0} "{1}"',
         setDvar: '{0} "{1}"',
         getDvar: '{0}'
     },

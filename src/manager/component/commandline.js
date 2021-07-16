@@ -108,11 +108,9 @@ module.exports = {
     onLoad: (_manager) => {
         manager = _manager
 
-        if (_manager.servers.length) {
-            addServerCommands(_manager.servers[0])
-            _manager.servers[0].on('updated_commands', () => {
-                addServerCommands(_manager.servers[0])
-            })
-        }
+        addServerCommands(manager)
+        manager.on('updated_commands', () => {
+            addServerCommands(manager)
+        })
     }
 }
