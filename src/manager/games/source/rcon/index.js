@@ -143,11 +143,11 @@ class Rcon {
             this.parser.statusRegexBot.lastIndex = 0
             this.parser.statusRegex.lastIndex = 0
 
-            if (line.match(botRegex)) {
+            if (line.match(this.parser.statusRegexBot)) {
                 const match = this.parser.statusRegexBot.exec(line)
                 players.push(this.parser.parseBotStatus(match))
             }
-            else if (line.match(playerRegex)) {
+            else if (line.match(this.parser.statusRegex)) {
                 const match = this.parser.statusRegex.exec(line)
                 players.push(this.parser.parseStatus(match))
             }
