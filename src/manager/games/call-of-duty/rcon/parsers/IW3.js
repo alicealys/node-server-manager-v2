@@ -7,6 +7,8 @@ module.exports = {
         setDvar: '{0} "{1}"',
         getDvar: '{0}'
     },
+    responseHeader: /\xff\xff\xff\xffprint\n/g,
+    statusHeader: /num +score +ping +playerid +steamid +name +lastmsg +address +qport +rate */g,
     rconCommandFormat: '\xff\xff\xff\xffrcon {0} {1}',
     dvarRegex: /\"(.*?)\" +(is:|is) +\"(.*?)\"/g,
     statusRegex: /^ +([0-9]+) +([0-9]+) +([0-9]+) +((?:[A-Za-z0-9]){8,32}|(?:[A-Za-z0-9]){8,32}|bot[0-9]+|(?:[[A-Za-z0-9]+)) +([0-9]+) *(.{0,32}) +([0-9]+) +(\d+\.\d+\.\d+.\d+\:-*\d{1,5}|0+.0+:-*\d{1,5}|loopback|unknown|bot) +(-*[0-9]+) +([0-9]+) *$/g,
@@ -35,5 +37,5 @@ module.exports = {
         'blue': '^5',
         'purple': '^6',
         'default': '^7',
-    },
+    }
 }

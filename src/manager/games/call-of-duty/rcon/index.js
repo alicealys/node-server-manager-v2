@@ -15,7 +15,7 @@ class Rcon {
         if (!config.gamename) {
             throw new Error('Gamename not defined')
         }
-        
+
         if (!fs.existsSync(path.join(__dirname, `./parsers/${config.gamename.toUpperCase()}.js`))) {
             throw new Error('Game not supported')
         }
@@ -32,10 +32,8 @@ class Rcon {
                 reject(new Error('Rcon connection failed'))
                 return
             }
-
-            const _result = result.trim().toLowerCase().replace(new RegExp(/(\n|\.|print|\xff)/g), '')
-            if (_result.endsWith('password')) {
-                reject(new Error('Invalid rcon password'))
+            if (!result.match(this.parser.statusHeader)) {
+                reject(new Error(`Invalid status header: ${result}`))
                 return
             }
 
@@ -52,8 +50,9 @@ class Rcon {
 
             const lines = status.trim().split('\n')
             const players = []
-    
+            
             lines.forEach(line => {
+                this.parser.statusRegex.lastIndex = 0
                 var match = this.parser.statusRegex.exec(line)
                 if (!match) {
                     return
@@ -68,8 +67,11 @@ class Rcon {
     }
 
     async getDvar(name) {
+        this.parser.dvarRegex.lastIndex = 0
+
         const result = await this.command(string.format(this.parser.commandTemplates.getDvar, name))
         const match = this.parser.dvarRegex.exec(result)
+
         if (result && match) {
             return match[3]
         }
@@ -90,7 +92,7 @@ class Rcon {
 
         for (var i = 0; i < this.commandRetries; i++) {
             const result = await this.commandInternal(command)
-            if (result) {
+            if (result !== false) {
                 return result
             }
 
@@ -142,9 +144,13 @@ class Rcon {
             })
 
             socket.once('message', (data) => {
-                end()
+                this.parser.responseHeader.lastIndex = 0
+
+                const string = data.toString('binary')
+                .replace(this.parser.responseHeader, '').trim()
                 clearTimeout(timeout)
-                resolve(data.toString())
+                resolve(string)
+                end()
             })
 
             socket.bind()

@@ -7,9 +7,11 @@ module.exports = {
         setDvar: 'set {0} "{1}"',
         getDvar: '{0}'
     },
+    responseHeader: /\xff\xff\xff\xffprint\n/g,
+    statusHeader: /num +score +ping +guid +name +lastmsg +address +qport +rate */g,
     rconCommandFormat: '\xff\xff\xff\xffrcon {0} {1}',
     dvarRegex: /\"(.*?)\" +(is:|is) +\"(.*?)(?:\^7|)\"/g,
-    statusRegex: /^ +([0-9]+) +([0-9]+) +([0-9]+) +((?:[A-Za-z0-9]){8,32}|(?:[A-Za-z0-9]){8,32}|bot[0-9]+|(?:[[A-Za-z0-9]+)) +([0-9]+) *(.{0,32}) +([0-9]+) +(\d+\.\d+\.\d+.\d+\:-*\d{1,5}|0+.0+:-*\d{1,5}|loopback|unknown|bot) +(-*[0-9]+) +([0-9]+) *$/g,
+    statusRegex: /^ +([0-9]+) +([0-9]+) +([0-9]+) +([0-9]+) +(.{0,32}) +([0-9]+) +(\d+\.\d+\.\d+.\d+\:-*\d{1,5}|0+.0+:-*\d{1,5}|loopback|unknown|bot) +(-*[0-9]+) +([0-9]+) *$/g,
     commandDelay: 500,
     parseStatus: (match) => {
         const address = match[7].split(':')
@@ -20,8 +22,8 @@ module.exports = {
             bot: false,
             ping: parseInt(match[3]),
             uniqueId: match[4],
-            name: match[6].replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), ``),
-            address: address[0],
+            name: match[5].replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), ``),
+            address: address[0] == '00000000.000000000000:0' ? '0.0.0.0' : address[0],
             port: parseInt(address[1])
         }
     },

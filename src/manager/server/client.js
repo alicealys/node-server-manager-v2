@@ -6,6 +6,7 @@ class Client extends EventEmitter {
         super()
 
         this.inGame = true
+        this.connected = new Date()
 
         const keys = Object.keys(fields)
         keys.forEach(key => {

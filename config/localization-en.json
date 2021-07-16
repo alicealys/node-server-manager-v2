@@ -12,6 +12,10 @@
     "CMD_ADDROLE_HIERARCHY_ERROR": "You cannot set that role",
     "CMD_ADDROLE_SUCCESS": "Added role <blue>{0}<default> to <blue>{1}<default>",
     "CMD_LISTROLES_FORMAT": "<blue>{0}<default>'s roles: {1}",
+    "CMD_STATUS_FORMAT": " - ^5{0}^7: '^3{1}^7' server at '^3{2}:{3}^7', ^3{4} ^7/^3 {5}^7 players, map: ^2{6}^7",
+    "CMD_LIST_TOTAL": " ^5{0}^7 server/s, ^2{1}^7 / ^3{2}^7 player/s",
+    "CMD_LIST_SERVER": " {0} ^5{1}^7",
+    "CMD_LIST_PLAYER": " {0}    {1} ^2{2}^7 (^3@{3}^7): time: ^3{4}^7, uniqueId: ^3{5}^7",
 
     "NOT_DEFINED": "Not defined",
 

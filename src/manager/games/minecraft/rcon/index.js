@@ -144,7 +144,7 @@ class Rcon {
 
                 reject('Authentication failed')
             }
-
+            
             const onError = (err) => {
                 this.socket.removeListener('data', onData)
                 reject(err)

@@ -57,13 +57,14 @@ class Server extends EventEmitter {
 
     async start() {
         this.dvars['sv_hostname'] = await this.rcon.getDvar('sv_hostname')
-        this.dvars['sv_maxclients'] = await this.rcon.getDvar('sv_maxclients')
+        this.dvars['sv_maxclients'] = parseInt(await this.rcon.getDvar('sv_maxclients'))
         this.dvars['mapname'] = await this.rcon.getDvar('mapname')
         this.dvars['g_gametype'] = await this.rcon.getDvar('g_gametype')
         this.dvars['version'] = await this.rcon.getDvar('version')
 
         this.hostname = this.dvars['sv_hostname']
         this.maxClients = this.dvars['sv_maxclients']
+        this.mapname = this.dvars['mapname']
 
         if (!this.hostname) {
             throw new Error('Unable to get server dvars')

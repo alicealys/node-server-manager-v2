@@ -11,5 +11,12 @@ module.exports = {
                 ? args[index]
                 : match
         })
+    },
+    pad(string, char, length) {
+        while (string.length < length) {
+            string += char
+        }
+        
+        return string
     }
 }

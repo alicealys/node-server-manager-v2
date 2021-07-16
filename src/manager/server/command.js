@@ -105,6 +105,14 @@ const hasPermission = (role, permission) => {
 }
 
 const comparePermissions = (a, b) => {
+    if (!a) {
+        return false
+    }
+
+    if (!b) {
+        return true
+    }
+        
     const splitA = a.split('.')
     const splitB = b.split('.')
 

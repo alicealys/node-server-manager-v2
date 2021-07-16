@@ -140,11 +140,14 @@ class Rcon {
         lines.forEach(line => {
             line = line.trim()
 
-            if (line.match(this.parser.statusRegexBot)) {
+            this.parser.statusRegexBot.lastIndex = 0
+            this.parser.statusRegex.lastIndex = 0
+
+            if (line.match(botRegex)) {
                 const match = this.parser.statusRegexBot.exec(line)
                 players.push(this.parser.parseBotStatus(match))
             }
-            else if (line.match(this.parser.statusRegex)) {
+            else if (line.match(playerRegex)) {
                 const match = this.parser.statusRegex.exec(line)
                 players.push(this.parser.parseStatus(match))
             }
@@ -169,6 +172,7 @@ class Rcon {
             }
         }
 
+        this.parser.dvarRegex.lastIndex = 0
         const result = await this.command(string.format(this.parser.commandTemplates.getDvar, name))
         const match = this.parser.dvarRegex.exec(result)
 
