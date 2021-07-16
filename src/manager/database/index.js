@@ -1,7 +1,6 @@
 const fs        = require('fs')
 const path      = require('path')
 const sqlite3   = require('sqlite3').verbose()
-const directory = path.join(__dirname, './models')
 const Sequelize = require('sequelize')
 const instance  = {}
 

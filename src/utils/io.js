@@ -14,6 +14,10 @@ module.exports = {
         const formatted = string.replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), `\x1b[3$1m`)
         console.log(formatted)
     },
+    formatColors: (string) => {
+        string += '^7'
+        return string.replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), `\x1b[3$1m`)
+    },
     ConfigWatcher: class {
         constructor(path) {
             var current = JSON.parse(fs.readFileSync(path).toString())

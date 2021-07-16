@@ -1,5 +1,6 @@
-const path         = require('path')
-const fs           = require('fs')
+const path = require('path')
+const fs   = require('fs')
+const io   = require('../utils/Io')
 
 if (fs.existsSync(path.join(__dirname, '../../config/config.json'))) {
     module.exports = new Promise((resolve, reject) => {
@@ -8,15 +9,100 @@ if (fs.existsSync(path.join(__dirname, '../../config/config.json'))) {
     return
 }
 
+const dialects  = ['sqlite', 'mariadb', 'postgres', 'mysql', 'mssql']
+const gamenames = fs.readdirSync(path.join(__dirname, '/games/call-of-duty/rcon/parsers')).map(x => x.split('.')[0])
+const games     = fs.readdirSync(path.join(__dirname, '/games/'))
+
+const config    = {database: {}, servers: []}
+
 var configFinished = false
 var serverIndex = -1
 
-const games = ['source', 'minecraft', 'call-of-duty']
-const config = {servers: []}
-
 const questions = [
     {
-        text: 'Command prefix (default: !): ',
+        text: `Database ^6dialect^7 ([^3${dialects.join(', ')}^7] default: ^5sqlite^7): `,
+        callback: (value) => {
+            value = value || 'sqlite'
+            value = value.toLowerCase()
+
+            if (!dialects.includes(value)) {
+                console.log('Dialect not supported')
+                return false
+            }
+
+            config.database.dialect = value
+            return true
+        }
+    },
+    {
+        text: `Database ^6path^7 (default: ^5'database/database.db'^7): `,
+        show: () => {
+            return config.database.dialect == 'sqlite'
+        },
+        callback: (value) => {
+            value = value || 'database/database.db'
+            config.database.path = value
+            return true
+        }
+    },
+    {
+        text: `Database ^6host^7: `,
+        show: () => {
+            return config.database.dialect != 'sqlite'
+        },
+        callback: (value) => {
+            if (!value) {
+                return false
+            }
+        
+            config.database.host = value
+            return true
+        }
+    },
+    {
+        text: `Database ^6username^7: `,
+        show: () => {
+            return config.database.dialect != 'sqlite'
+        },
+        callback: (value) => {
+            if (!value) {
+                return false
+            }
+
+            config.database.username = value
+            return true
+        }
+    },
+    {
+        text: `Database ^6password^7: `,
+        show: () => {
+            return config.database.dialect != 'sqlite'
+        },
+        callback: (value) => {
+            if (!value) {
+                return false
+            }
+
+            config.database.password = value
+            return true
+        }
+    },
+    {
+        text: `Database ^6name^7: `,
+        show: () => {
+            return config.database.dialect != 'sqlite'
+        },
+        callback: (value) => {
+            if (!value) {
+                return false
+            }
+
+            config.database.name = value
+            return true
+        }
+    },
+    {
+        text: '^6Command prefix^7 (default: ^5!^7): ',
         callback: (value) => {
             value = value || '!'
             config.commandPrefix = '!'
@@ -24,7 +110,7 @@ const questions = [
         }
     },
     {
-        text: 'Server host (default: localhost): ',
+        text: 'Server ^6host^7 (default: ^5localhost^7): ',
         callback: (value) => {
             serverIndex++
             config.servers.push({})
@@ -35,7 +121,7 @@ const questions = [
         }
     },
     {
-        text: 'Server port [0-65536]: ',
+        text: 'Server ^6port^7 (^3[0-65536]^7): ',
         callback: (value) => {
             if (!value) {
                 return false
@@ -52,7 +138,7 @@ const questions = [
         }
     },
     {
-        text: 'Server rcon port (default: [server port]): ',
+        text: 'Server ^6rcon port^7 (default: ^5[server port]^7): ',
         callback: (value) => {
             if (value) {
                 value = parseInt(value)
@@ -68,7 +154,7 @@ const questions = [
         }
     },
     {
-        text: 'Server rcon password: ',
+        text: 'Server ^6rcon password^7: ',
         callback: (value) => {
             if (!value) {
                 return false
@@ -79,7 +165,7 @@ const questions = [
         }
     },
     {
-        text: 'Server log path (folder path for source games): ',
+        text: 'Server ^6log path^7 (^1folder path for source games^7): ',
         callback: (value) => {
             if (!value) {
                 return false
@@ -90,7 +176,7 @@ const questions = [
         }
     },
     {
-        text: `Server game (${games.toString()}): `,
+        text: `Server ^6game^7 ([^3${games.join(', ')}^7]): `,
         callback: (value) => {
             if (!value) {
                 return false
@@ -108,12 +194,17 @@ const questions = [
         }
     },
     {
-        text: `Server gamename (call-of-duty only, ex. IW5, IW4, ecc): `,
+        text: `Server ^6gamename^7 ([^3${gamenames.join(', ')}^7]): `,
         show: () => {
             return config.servers[serverIndex].game == 'call-of-duty'
         },
         callback: (value) => {
             if (!value) {
+                return false
+            }
+
+            if (!gamenames.includes(value.toUpperCase())) {
+                console.log('Invalid gamename')
                 return false
             }
 
@@ -124,7 +215,7 @@ const questions = [
         }
     },
     {
-        text: `Add another server? [y/n]: `,
+        text: `Add another server? [^2y^7/^1n^7]: `,
         callback: (value, next) => {
             if (!value) {
                 return false
@@ -160,11 +251,10 @@ module.exports = new Promise((resolve, reject) => {
         var question = questions[index]
 
         if (question.show != undefined && !question.show()) {
-            index++
-            question = questions[index]
+            askQuestion(index + 1)
         }
 
-        rl.question(question.text, (string) => {
+        rl.question(io.formatColors(question.text), (string) => {
             string = string.trim().length > 0 ? string : null
 
             var nextIndex = index + 1
@@ -188,7 +278,7 @@ module.exports = new Promise((resolve, reject) => {
 
     rl.on('close', () => {
         if (!configFinished) {
-            console.log('Configuration aborted, exiting')
+            console.log('\nConfiguration aborted, exiting')
             process.exit(0)
         }
 
