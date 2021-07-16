@@ -42,7 +42,7 @@ class Log {
 
             fs.watch(config.logPath, (eventType, filename) => {
                 if (currentFile != filename) {
-                    if (this.watcher && typeof this.watcher == 'function') {
+                    if (this.watcher && typeof this.watcher.destroy == 'function') {
                         this.watcher.destroy()
                         this.watcher = null
                     }

@@ -8,6 +8,8 @@ module.exports = {
     onLoad: (manager) => {
         manager.servers.forEach(server => {
             server.on('message', (client, message) => {
+                console.log(message)
+
                 const prefix = config.current.commandPrefix
         
                 if (!config.current.commandPrefix || !message.startsWith(prefix)) {
