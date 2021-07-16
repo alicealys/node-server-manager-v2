@@ -1,4 +1,5 @@
-const Client = require('../../../server/client')
+const Client     = require('../../../server/client')
+const steamUtils = require('../../../../utils/steam')
 
 class Dispatcher {
     constructor(server) { 
@@ -28,7 +29,12 @@ class Dispatcher {
                 {
                     const name = event.args[0]
                     const slot = parseInt(event.args[1])
-                    const uniqueId = event.args[2]
+                    const uniqueId = event.args[2] == 'BOT' ? name : steamUtils.toSteamID64(event.args[2])
+
+                    const exists = this.server.clients.find(client => client.uniqueId == uniqueId)
+                    if (exists) {
+                        return
+                    }
 
                     const list = await this.server.rcon.playerList()
                     const player = list.find(player => player.slot == slot)

@@ -4,7 +4,7 @@ const regex = {
     say: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" say "(.+)"/g,
     purchase: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" purchased "(.+)"/g,
     assist: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" assisted killing "(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>"/g,
-    connect: /"(.+?)\<(\d+)\>\<(\S+)\>\<\>" entered the game/g,
+    connect: /"(.+?)\<(\d+)\>\<(\S+)\>\<\>" connected.+/g,
     disconnect: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" disconnected \(reason "(.+|)"\)/g,
     switch_team: /"(.+?)\<(\d+)\>\<(\S+)\>" switched from team \<(\S+)\> to \<(\S+)\>/g,
     suicide: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" \[(-?\d+) (-?\d+) (-?\d+)\] committed suicide with "(.+)"/g,

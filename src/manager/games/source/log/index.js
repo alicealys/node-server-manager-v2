@@ -26,7 +26,6 @@ class Log {
 
         var currentFile = null
 
-        // Watch the most recent file
         fs.readdir(config.logPath, (err, files) => {
             files = files.map((name) => {
                 return {
@@ -43,7 +42,7 @@ class Log {
 
             fs.watch(config.logPath, (eventType, filename) => {
                 if (currentFile != filename) {
-                    if (this.watcher) {
+                    if (this.watcher && typeof this.watcher == 'function') {
                         this.watcher.destroy()
                         this.watcher = null
                     }

@@ -37,16 +37,7 @@ class Rcon {
     constructor(server, config) {
         this.server = server
         this.config = config
-
-        if (!config.gamename) {
-            config.gamename = 'csgo'
-        }
-        
-        if (!fs.existsSync(path.join(__dirname, `./parsers/${config.gamename.toLowerCase()}.js`))) {
-            throw new Error('Game not supported')
-        }
-
-        this.parser = require(`./parsers/${config.gamename.toLowerCase()}`)
+        this.parser = require(`./parser`)
 
         this.packetId = 0
 

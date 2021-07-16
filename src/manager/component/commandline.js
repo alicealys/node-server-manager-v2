@@ -10,6 +10,8 @@ rl.init({
     prompt: '\x1b[34m[nsm²] > \x1b[0m'
 })
 
+var manager = null
+
 const commands = {
     'quit': () => {
         process.exit(0)
@@ -103,11 +105,13 @@ const addServerCommands = (server) => {
 }
 
 module.exports = {
-    onLoad: (manager) => {
-        if (manager.servers.length) {
-            addServerCommands(manager.servers[0])
-            manager.servers[0].on('updated_commands', () => {
-                addServerCommands(manager.servers[0])
+    onLoad: (_manager) => {
+        manager = _manager
+
+        if (_manager.servers.length) {
+            addServerCommands(_manager.servers[0])
+            _manager.servers[0].on('updated_commands', () => {
+                addServerCommands(_manager.servers[0])
             })
         }
     }

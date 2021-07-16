@@ -1,5 +1,5 @@
-const string     = require('../../../../../utils/string')
-const steamUtils = require('../../../../../utils/steam')
+const string     = require('../../../../utils/string')
+const steamUtils = require('../../../../utils/steam')
 
 module.exports = {
     commandTemplates: {
@@ -67,8 +67,8 @@ module.exports = {
         'purple': '\x0D',
         'default': '\x01',
     },
-    statusRegex: /^# +(\d+) +(\d+) +"(.+)" +(\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+) +(\d+) +(\d+\.\d+.\d+.\d+:\d+)$/g,
-    statusRegexBot: /^#(\d+) +"(.+)" +(\S+) +(\S+) +(\d+)$/g,
+    statusRegex: /^# +(\d+)(?: +|)(\d+|) +"(.+)" +(\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+)(?: +|)(\d+|) +(\d+\.\d+.\d+.\d+:\d+)$/g,
+    statusRegexBot: /^# +(\d+) +"(.+)" +(\S+) +(\S+)(?: +|)(\d+|)$/g,
     dvarRegex: /"(.+)" = "(.+)" (?:\( def. "(.*)" \))?(?: |\w|\\n|\n|) +- (.+)/g,
     playersRegex: /players *: +(\d)+ humans, (\d)+ bots \((\d+).+/g,
     parseBotStatus: (match) => {
