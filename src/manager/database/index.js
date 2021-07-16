@@ -111,7 +111,7 @@ instance.connect = (config) => {
             resolve(instance)
         })
         .catch(err => {
-            reject(new Error('Database authentication failed: ' + err + err.stack.toString()))
+            reject(new Error('Database authentication failed: ' + err))
         })
     })
 }
