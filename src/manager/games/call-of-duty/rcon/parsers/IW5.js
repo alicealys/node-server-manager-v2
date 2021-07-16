@@ -18,7 +18,7 @@ module.exports = {
             score: parseInt(match[2]),
             bot: match[3] == '1',
             ping: parseInt(match[4]),
-            uniqueId: parseInt(match[5].substr(8), 16).toString(),
+            uniqueId: match[3] == '1' ? match[3] : parseInt(match[5].substr(8), 16).toString(),
             name: match[6].replace(new RegExp(/\^([0-9]|\:|\;)/g, 'g'), ``),
             address: address[0],
             port: parseInt(address[1])

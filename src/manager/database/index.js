@@ -5,42 +5,114 @@ const directory = path.join(__dirname, './models')
 const Sequelize = require('sequelize')
 const instance  = {}
 
-instance.connect = () => {
+const loadSqliteDatabase = (path) => {
     return new Promise((resolve, reject) => {
-        new sqlite3.Database(path.join(__dirname, 'database.db'), (err) => {
-            var sequelize = new Sequelize({
-                host: 'localhost',
-                dialect: 'sqlite',
-                pool: {
-                   max: 5,
-                   min: 0,
-                   idle: 10000
-                },
-                logging: false,
-                storage: path.join(__dirname, 'database.db')
-            })
-        
+        new sqlite3.Database(path, (err) => {
+            if (err) {
+                reject(err)
+                return
+            }
+
+            resolve()
+        })
+    })
+}
+
+instance.connect = (config) => {
+    return new Promise(async (resolve, reject) => {
+        if (!config.database) {
+            reject(new Error('Database not specified in config'))
+            return
+        }
+
+        if (!config.database.dialect) {
+            reject(new Error('Database dialect not specified in config'))
+            return
+        }
+
+        var sequelize = null
+
+        switch (config.database.dialect) {
+            case 'sqlite':
+                var dbPath = config.database.path
+                dbPath = dbPath || 'database/database.db'
+                dbPath = path.join(__dirname, '../../../', dbPath)
+                fs.mkdirSync(path.dirname(dbPath), {recursive: true})
+                await loadSqliteDatabase(config.database.path)
+
+                sequelize = new Sequelize({
+                    host: 'localhost',
+                    dialect: 'sqlite',
+                    pool: {
+                       max: 5,
+                       min: 0,
+                       idle: 10000
+                    },
+                    logging: false,
+                    storage: config.database.path
+                })
+
+                break
+            case 'mysql':
+            case 'mariadb':
+            case 'postgres':
+            case 'mssql':
+                if (!config.database.name) {
+                    reject(new Error('Database name not specified in config'))
+                    return
+                }
+
+                if (!config.database.host) {
+                    reject(new Error('Database host not specified in config'))
+                    return
+                }
+
+                if (!config.database.username) {
+                    reject(new Error('Database username not specified in config'))
+                    return
+                }
+
+                if (!config.database.password) {
+                    reject(new Error('Database password not specified in config'))
+                    return
+                }
+            
+                sequelize = new Sequelize(
+                    config.database.name, 
+                    config.database.username, 
+                    config.database.password, 
+                    {
+                        host: config.database.host,
+                        dialect: config.database.dialect,
+                        pool: {
+                            max: 5,
+                            min: 0,
+                            idle: 10000
+                         },
+                        logging: false,
+                    }
+                )
+
+                break
+        }
+
+        sequelize.authenticate()
+        .then(async () => {
             instance.sequelize = sequelize
             instance.models = {}
         
-            fs.readdir(directory, async (err, files) => {
-                if (err) {
-                    reject(new Error('Unable to scan directory'))
-                    return
-                }
-        
-                files.forEach(file => {
-                    file = path.join(__dirname, `./models/${file}`)
-        
-                    const model = require(file)(sequelize, Sequelize)
-                    const name = path.basename(file, path.extname(file))
-                    instance.models[name] = model
-                })
+            const names = ['clients', 'connections', 'clientMeta']
 
-                await instance.initialize()
-
-                resolve(instance)
+            names.forEach(name => {
+                instance.models[name] = require(`./models/${name}`)(sequelize, Sequelize)
             })
+
+            await instance.initialize()
+
+            resolve(instance)
+        })
+        .catch(err => {
+            reject(new Error('Database authentication failed: ' + err + err.stack.toString()))
         })
     })
 }

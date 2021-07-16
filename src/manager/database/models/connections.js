@@ -18,15 +18,15 @@ module.exports = (sequelize, Sequelize) => {
             }
         },
         uniqueId: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             allowNull: false
         },
         name: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             allowNull: false,
         },
         address: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             allowNull: true,
         },
         date: {
@@ -65,11 +65,15 @@ module.exports = (sequelize, Sequelize) => {
     connections.findByName = async (name, limit = 50) => {
         const result = await connections.instance.findAll({
             group: ['clientId'],
-            order: [
-                ['date', 'desc']
-            ],
             raw: true,
             limit,
+            attributes: [
+                'clientId',
+                'uniqueId',
+                'name',
+                'address',
+                [sequelize.fn('MAX', sequelize.col('date')), 'date']
+            ],
             where: {
                 name: {
                     [Sequelize.Op.like]: `%${name}%`

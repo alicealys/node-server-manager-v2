@@ -5,6 +5,7 @@ const string       = require('../../utils/string')
 const array        = require('../../utils/array')
 const io           = require('../../utils/io')
 const path         = require('path')
+const moment       = require('moment')
 
 const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
@@ -36,7 +37,7 @@ const plugin = {
                     const role = commandUtils.getRole(resultClient.roles)
                     const roleName = role.color ? `<${role.color}>${role.name}<default>` : role.name
 
-                    await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, roleName, result[i].date))
+                    await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, roleName, moment.tz(result[i].date, client.geoip.timezone).calendar()))
                     client.inGame && await delay(500)
                 }
             })

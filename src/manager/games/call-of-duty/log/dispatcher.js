@@ -13,7 +13,9 @@ class Dispatcher {
         switch (event.type) {
             case 'join':
                 {
-                    const uniqueId = this.server.rcon.parser.parseGuid(event.args[2])
+                    const uniqueId = event.args[2].includes('bot') 
+                        ? event.args[2] 
+                        : this.server.rcon.parser.parseGuid(event.args[2])
                     const slot = parseInt(event.args[3])
                     const name = event.args[4]
 

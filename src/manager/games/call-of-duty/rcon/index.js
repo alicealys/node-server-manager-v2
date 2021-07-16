@@ -33,7 +33,8 @@ class Rcon {
                 return
             }
 
-            if (result.trim().endsWith('Invalid rcon password') || result.trim().endsWith('Invalid password')) {
+            const _result = result.trim().toLowerCase().replace(new RegExp(/(\n|\.|print|\xff)/g), '')
+            if (_result.endsWith('password')) {
                 reject(new Error('Invalid rcon password'))
                 return
             }

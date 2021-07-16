@@ -20,11 +20,19 @@
     "big-integer": "^1.6.48",
     "delay": "^5.0.0",
     "fs": "^0.0.1-security",
+    "geoip-lite": "^1.4.2",
+    "mariadb": "^2.5.4",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33",
+    "mysql2": "^2.2.5",
     "path": "^0.12.7",
+    "pg": "^8.6.0",
+    "pg-hstore": "^2.3.4",
     "sequelize": "^6.6.5",
     "serverline": "^1.5.0",
     "sqlite3": "^5.0.2",
     "tail": "^2.2.3",
+    "tedious": "^11.2.0",
     "varint": "^6.0.0"
   }
 }

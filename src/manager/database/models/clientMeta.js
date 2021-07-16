@@ -18,12 +18,12 @@ module.exports = (sequelize, Sequelize) => {
             }
         },
         key: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             allowNull: true,
             unique: true
         },
         value: {
-            type: Sequelize.TEXT,
+            type: Sequelize.BLOB,
             allowNull: true
         }
     }, {

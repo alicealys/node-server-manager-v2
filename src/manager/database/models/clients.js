@@ -10,21 +10,16 @@ module.exports = (sequelize, Sequelize) => {
             primaryKey: true
         },
         uniqueId: {
-            type: Sequelize.TEXT,
+            type: Sequelize.STRING,
             allowNull: false,
             unique: true
         },
         roles: {
-            type: Sequelize.JSON,
+            type: Sequelize.BLOB,
             allowNull: false,
-            defaultValue: ['everyone'],
+            defaultValue: '["everyone"]',
         },
         firstConnection: {
-            type: Sequelize.DATE,
-            allowNull: false,
-            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-        },
-        lastConnection: {
             type: Sequelize.DATE,
             allowNull: false,
             defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -73,7 +68,7 @@ module.exports = (sequelize, Sequelize) => {
 
         await clients.instance.build({
             uniqueId,
-            roles
+            roles: JSON.stringify(roles)
         }).save()
 
         return await clients.add(uniqueId)
@@ -88,7 +83,7 @@ module.exports = (sequelize, Sequelize) => {
         client.roles.push(role)
 
         await clients.instance.update({
-            roles: client.roles
+            roles: JSON.stringify(client.roles)
         }, {
             where: {
                 clientId

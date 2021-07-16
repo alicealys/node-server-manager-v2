@@ -103,13 +103,6 @@ require('./config-maker')
         return await database.getClient(accessor)
     }
     
-    const loader = new Loader(manager)
-    loader.onInit()
-    
-    process.on('exit', () => {
-        loader.onUnload()
-    })
-    
     const loadServer = (cfg, context) => {
         return new Promise((resolve, reject) => {
             try {
@@ -138,12 +131,27 @@ require('./config-maker')
     }
     
     (async () => {
-        await database.connect()
-    
-        for (const cfg of config.servers) {
-            await loadServer(cfg, {database, manager})
-        }
-    
-        loader.onLoad(manager)
+        console.log('Connecting to database...')
+        database.connect(globalConfig)
+        .then(async () => {
+            const loader = new Loader(manager)
+            loader.onInit()
+
+            process.on('exit', () => {
+                loader.onUnload()
+            })
+
+            for (const cfg of config.servers) {
+                await loadServer(cfg, {database, manager})
+            }
+        
+            loader.onLoad(manager)
+        })
+        .catch((err) => {
+            console.log(`Failed to connect to database:`)
+            console.log(err)
+            console.log('Exiting...')
+            process.exit(0)
+        })
     })();
 })
