@@ -35,6 +35,7 @@ module.exports = {
                     const split = status.split('\n')
 
                     for (const line of split) {
+                        rcon.parser.playersRegex.lastIndex = 0
                         const match = rcon.parser.playersRegex.exec(line)
                         if (match) {
                             return match[3]
@@ -43,11 +44,21 @@ module.exports = {
                 }
             }
         },
+        'version': {
+            get: {
+                type: 'function',
+                callback: async (rcon) => {
+                    const result = await rcon.command(string.format(rcon.parser.commandTemplates.getDvar, 'version'))
+                    return result
+                }
+            }
+        },
         'mapname': {
             get: {
                 type: 'function',
                 callback: async (rcon) => {
-                    const result = await rcon.command(string.format(rcon.parser.commandTemplates.getDvar, 'mapname'))
+                    rcon.parser.dvarRegex.lastIndex = 0
+                    const result = await rcon.command(string.format(rcon.parser.commandTemplates.getDvar, 'host_map'))
                     const match = rcon.parser.dvarRegex.exec(result)
 
                     if (result && match) {
@@ -70,8 +81,8 @@ module.exports = {
     },
     statusRegex: /^# +(\d+)(?: +|)(\d+|) +"(.+)" +(\S+) +(\d+:\d+) +(\d+) +(\d+) +(\S+)(?: +|)(\d+|) +(\d+\.\d+.\d+.\d+:\d+)$/g,
     statusRegexBot: /^# +(\d+) +"(.+)" +(\S+) +(\S+)(?: +|)(\d+|)$/g,
-    dvarRegex: /"(.+)" = "(.+)" (?:\( def. "(.*)" \))?(?: |\w|\\n|\n|) +- (.+)/g,
-    playersRegex: /players *: +(\d)+ humans, (\d)+ bots \((\d+).+/g,
+    dvarRegex: /"(.+)" = "(.+)" (?:\( def. "(.*)" \))/g,
+    playersRegex: /players *: +(\d+) +(?:humans, +|)(\d+|)(?: +bots |)\((\d+).+/g,
     parseBotStatus: (match) => {
         return {
             name: match[2],
