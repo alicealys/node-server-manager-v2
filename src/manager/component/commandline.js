@@ -1,4 +1,4 @@
-const path         =  require('path')
+const path         = require('path')
 const io           = require('../../utils/io')
 const string       = require('../../utils/string')
 const localization = require('../../utils/localization')
@@ -12,13 +12,56 @@ rl.init({
 
 var manager = null
 
-const commands = {
+const consoleCommands = {
     'quit': () => {
         process.exit(0)
+    },
+    'clear': () => {
+        process.stdout.write('\u001B[2J\u001B[0;0f')
+    },
+    'status': () => {
+        for (const server of manager.servers.filter(server => server.loaded)) {
+            io.print(string.format(localization['CMD_STATUS_FORMAT'],
+                server.hostname,
+                server.config.game,
+                server.config.host,
+                server.config.port,
+                server.clients.length,
+                server.maxClients,
+                server.mapname || 'none'
+            ))
+        }
+    },
+    'list': () => {
+        const servers = manager.servers.filter(server => server.loaded)
+        const totalClients = manager.clients.length
+        const totalServers = servers.length
+        const totalMaxClients = servers.reduce((total, server) => total + server.maxClients, 0)
+
+        io.print(string.format(localization['CMD_LIST_TOTAL'],totalServers, totalClients, totalMaxClients))
+
+        var o = 0
+        for (const server of servers) {
+            const serverBranch = o < servers.length - 1 ? '├───' : '└───'
+            io.print(string.format(localization['CMD_LIST_SERVER'], serverBranch, server.hostname))
+
+            var i = 0
+            for (const client of server.clients) {
+                const branch = i++ < server.clients.length - 1 ? '├───' : '└───'
+                const mainBranch = o < servers.length - 1 ? '│' : ' '
+                const time = new Date(new Date() - client.connected).toISOString().substr(11, 8)
+
+                io.print(string.format(localization['CMD_LIST_PLAYER'], mainBranch, branch, client.name, client.clientId, time, client.uniqueId))
+            }
+
+            o++
+        }
     }
 }
 
-rl.setCompletion(Object.keys(commands))
+var commands = {...consoleCommands}
+
+rl.setCompletion(Object.keys(consoleCommands))
 
 rl.on('line', (cmd) => {
     if (cmd.length == 0) {
@@ -99,6 +142,8 @@ const addServerCommands = (server) => {
         if (cmd.alias) {
             commands[cmd.alias] = callback
         }
+
+        commands = {...commands, ...consoleCommands}
         
         rl.setCompletion(Object.keys(commands))
     }
