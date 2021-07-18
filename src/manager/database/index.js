@@ -20,18 +20,18 @@ const loadSqliteDatabase = (path) => {
 instance.connect = (config) => {
     return new Promise(async (resolve, reject) => {
         if (!config.database) {
-            reject(new Error('Database not specified in config'))
+            reject(new Error('Database not set in config'))
             return
         }
 
         if (!config.database.dialect) {
-            reject(new Error('Database dialect not specified in config'))
+            reject(new Error('Database dialect not set in config'))
             return
         }
 
         var sequelize = null
 
-        switch (config.database.dialect) {
+        switch (config.database.dialect.toLowerCase()) {
             case 'sqlite':
                 var dbPath = config.database.path
                 dbPath = dbPath || 'database/database.db'
@@ -57,22 +57,22 @@ instance.connect = (config) => {
             case 'postgres':
             case 'mssql':
                 if (!config.database.name) {
-                    reject(new Error('Database name not specified in config'))
+                    reject(new Error('Database name not set in config'))
                     return
                 }
 
                 if (!config.database.host) {
-                    reject(new Error('Database host not specified in config'))
+                    reject(new Error('Database host not set in config'))
                     return
                 }
 
                 if (!config.database.username) {
-                    reject(new Error('Database username not specified in config'))
+                    reject(new Error('Database username not set in config'))
                     return
                 }
 
                 if (!config.database.password) {
-                    reject(new Error('Database password not specified in config'))
+                    reject(new Error('Database password not set in config'))
                     return
                 }
             
@@ -93,6 +93,9 @@ instance.connect = (config) => {
                 )
 
                 break
+            default:
+                reject(new Error('Invalid database dialect'))
+                return
         }
 
         sequelize.authenticate()
@@ -100,7 +103,7 @@ instance.connect = (config) => {
             instance.sequelize = sequelize
             instance.models = {}
         
-            const names = ['clients', 'connections', 'clientMeta']
+            const names = ['clients', 'connections', 'clientMeta', 'penalties']
 
             names.forEach(name => {
                 instance.models[name] = require(`./models/${name}`)(sequelize, Sequelize)
@@ -119,7 +122,7 @@ instance.connect = (config) => {
 instance.initialize = async () => {
     var result = await instance.models.clients.find('__console__')
     if (result) {
-        instance.consoleId = result.consoleId
+        instance.consoleId = result.clientId
         return
     }
 

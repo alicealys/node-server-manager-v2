@@ -18,5 +18,18 @@ module.exports = {
         }
         
         return string
+    },
+    parseColors(colors, string) {
+        if (!colors) {
+            return string
+        }
+
+        string = colors.default + string
+        return string.replace(/\<(.+?)\>/g, (match, index) => {
+            const original = match
+            match = match.toLowerCase().slice(1, -1)
+
+            return colors[match] || original
+        })
     }
 }

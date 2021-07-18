@@ -15,7 +15,20 @@
     "CMD_STATUS_FORMAT": " - ^5{0}^7: '^3{1}^7' server at '^3{2}:{3}^7', ^3{4} ^7/^3 {5}^7 players, map: ^2{6}^7",
     "CMD_LIST_TOTAL": " ^5{0}^7 server/s, ^2{1}^7 / ^3{2}^7 player/s",
     "CMD_LIST_SERVER": " {0} ^5{1}^7",
-    "CMD_LIST_PLAYER": " {0}    {1} ^2{2}^7 (^3@{3}^7): time: ^3{4}^7, uniqueId: ^3{5}^7",
+    "CMD_LIST_PLAYER": " {0}    {1} ^2{2}^7 (^3@{3}^7): role: {4}, time: ^3{5}^7, uniqueId: ^3{6}^7",
+    "CMD_TIME_PARSE_ERROR": "Could not parse duration",
+    "CMD_TEMPBAN_MAX_BAN_DURATION": "Maximum ban duration is <blue>{0}<default>",
+    "CMD_EXEC_HIERARCHY_ERROR": "Cannot execute this on that client",
+
+    "PENALTIES_KICK_MSG": "You have been kicked: <blue>{0}<default>",
+    "PENALTIES_BAN_MSG": "<default>Permanently banned for: <blue>{0}<default>",
+    "PENALTIES_TEMPBAN_MSG": "<default>Temporarily banned for: <blue>{0}<default>, time left: <blue>{1}<default>",
+
+    "CMD_KICK_FORMAT": "Kicked <blue>{0}<default> for <blue>{1}<default>",
+    "CMD_BAN_FORMAT": "Permanently banned <blue>{0}<default> for <blue>{1}<default>",
+    "CMD_TEMPBAN_FORMAT": "Temporarily banned <blue>{0}<default> for <blue>{1}<default> for <blue>{2}<default>",
+    "CMD_UNBAN_FORMAT": "Unbanned <blue>{0}<default> for <blue>{1}<default>",
+    "CMD_UNBAN_NOT_BANNED_FORMAT": "<blue>{0}<default> isn't banned",
 
     "NOT_DEFINED": "Not defined",
 

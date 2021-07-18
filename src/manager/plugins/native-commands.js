@@ -8,6 +8,28 @@ const path         = require('path')
 const moment       = require('moment')
 
 const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
+const penaltyTypes = require('../database/penaltyTypes')
+
+const parseTime = (string) => {
+    const units = {
+        's': 1,
+        'm': 60,
+        'h': 60 * 60,
+        'd': 24 * 60 * 60
+    }
+    
+    const regex = /([0-9]+)([A-Za-z]+)/g
+    const match = regex.exec(string)
+    
+    const time = parseInt(match[1])
+    const unit = match[2]
+
+    if (!Number.isInteger(time) || !units[unit]) {
+        return null
+    }
+
+    return time * units[unit]
+}
 
 const plugin = {
     onLoad: async (server) => {
@@ -164,6 +186,210 @@ const plugin = {
                 }
 
                 client.tell(string.format(localization['CMD_LISTROLES_FORMAT'], target.name, buffer))
+            })
+        )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('kick')
+            .setAlias('k')
+            .setPermission('moderation.kick')
+            .setMinArgs(2)
+            .setCallback(async (client, args) => {
+                const accessor = args[1]
+                const reason = args.join(2)
+                const target = await server.manager.getClientInServers(accessor)
+
+                if (!target) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                    return
+                }
+
+                const targetRole = commandUtils.getRole(target.roles)
+                const originRole = commandUtils.getRole(client.roles)
+
+                if (targetRole.index <= originRole.index) {
+                    client.tell(localization['CMD_EXEC_HIERARCHY_ERROR'])
+                    return
+                }
+
+                target.kick(client.clientId, reason)
+                client.tell(string.format(localization['CMD_KICK_FORMAT'], target.name, reason))
+            })
+        )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('ban')
+            .setAlias('b')
+            .setPermission('moderation.ban')
+            .setMinArgs(2)
+            .setCallback(async (client, args) => {
+                const accessor = args[1]
+                const reason = args.join(2)
+                const target = await server.manager.getClient(accessor)
+
+                if (!target) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                    return
+                }
+
+                const targetRole = commandUtils.getRole(target.roles)
+                const originRole = commandUtils.getRole(client.roles)
+
+                if (targetRole.index <= originRole.index) {
+                    client.tell(localization['CMD_EXEC_HIERARCHY_ERROR'])
+                    return
+                }
+
+                if (target.inGame) {
+                    target.ban(client.clientId, reason)
+                } else {
+                    server.database.models.penalties.add({
+                        originId: client.clientId,
+                        targetId: target.clientId,
+                        type: penaltyTypes.BAN,
+                        reason: reason
+                    })
+
+                    server.emit('penalty', {
+                        type: penaltyTypes.BAN, 
+                        originId: client.clientId,
+                        targetId: target.clientId, 
+                        reason
+                    })
+
+                    server.manager.emit('penalty', {
+                        type: penaltyTypes.BAN, 
+                        originId: client.clientId,
+                        targetId: target.clientId, 
+                        reason
+                    })
+                }
+
+                client.tell(string.format(localization['CMD_BAN_FORMAT'], target.name, reason))
+            })
+        )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('unban')
+            .setAlias('ub')
+            .setPermission('moderation.unban')
+            .setMinArgs(2)
+            .setCallback(async (client, args) => {
+                const accessor = args[1]
+                const reason = args.join(2)
+                const target = await server.manager.getClient(accessor)
+
+                if (!target) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                    return
+                }
+
+                const targetRole = commandUtils.getRole(target.roles)
+                const originRole = commandUtils.getRole(client.roles)
+
+                if (targetRole.index <= originRole.index) {
+                    client.tell(localization['CMD_EXEC_HIERARCHY_ERROR'])
+                    return
+                }
+
+                const isBanned = await database.models.penalties.getBan(target.clientId)
+                if (!isBanned) {
+                    client.tell(string.format(localization['CMD_UNBAN_NOT_BANNED_FORMAT'], target.name))
+                    return
+                }
+
+                await server.database.models.penalties.unBan({
+                    originId: client.clientId,
+                    targetId: target.clientId,
+                    reason: reason
+                })
+
+                client.tell(string.format(localization['CMD_UNBAN_FORMAT'], target.name, reason))
+                server.emit('penalty', {
+                    type: penaltyTypes.UNBAN, 
+                    originId: client.clientId,
+                    targetId: target.clientId, 
+                    reason
+                })
+
+                server.manager.emit('penalty', {
+                    type: penaltyTypes.UNBAN, 
+                    originId: client.clientId,
+                    targetId: target.clientId, 
+                    reason
+                })
+            })
+        )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('tempban')
+            .setAlias('tb')
+            .setPermission('moderation.tempban')
+            .setMinArgs(2)
+            .setCallback(async (client, args) => {
+                const accessor = args[1]
+                const time = args[2]
+                const reason = args.join(3)
+                const target = await server.manager.getClient(accessor)
+
+                if (!target) {
+                    client.tell(localization['CMD_FIND_NO_RESULTS'])
+                    return
+                }
+
+                const parsedTime = parseTime(time)
+
+                if (parsedTime === null || !Number.isInteger(parsedTime) || parsedTime <= 0) {
+                    client.tell(localization['CMD_TIME_PARSE_ERROR'])
+                    return
+                }
+
+                if (config.maxBanDuration && parsedTime > config.maxBanDuration) {
+                    client.tell(string.format(localization['CMD_TEMPBAN_MAX_BAN_DURATION'], moment.duration(config.maxBanDuration).humanize()))
+                    return
+                }
+
+                const targetRole = commandUtils.getRole(target.roles)
+                const originRole = commandUtils.getRole(client.roles)
+
+                if (targetRole.index <= originRole.index) {
+                    client.tell(localization['CMD_EXEC_HIERARCHY_ERROR'])
+                    return
+                }
+
+                if (target.inGame) {
+                    target.tempBan(client.clientId, reason, parsedTime)
+                } else {
+                    server.database.models.penalties.add({
+                        originId: client.clientId,
+                        targetId: target.clientId,
+                        type: penaltyTypes.TEMPBAN,
+                        reason: reason,
+                        end: Math.floor(new Date() / 1000) + parsedTime
+                    })
+
+                    server.emit('penalty', {
+                        type: penaltyTypes.TEMPBAN, 
+                        originId: client.clientId,
+                        targetId: target.clientId, 
+                        reason,
+                        parsedTime
+                    })
+
+                    server.manager.emit('penalty', {
+                        type: penaltyTypes.TEMPBAN, 
+                        originId: client.clientId,
+                        targetId: target.clientId, 
+                        reason,
+                        parsedTime
+                    })
+                }
+
+                client.tell(string.format(localization['CMD_TEMPBAN_FORMAT'], target.name, reason, moment.duration(parsedTime * 1000).humanize()))
             })
         )
     }

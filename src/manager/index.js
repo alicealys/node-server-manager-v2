@@ -1,5 +1,7 @@
 require('./config-maker')
 .then(config => {
+    process.env.locale = config.locale || 'en'
+
     const Server        = require('./server/server')
     const PluginLoader  = require('./server/plugin-loader')
     const Loader        = require('./loader')
@@ -9,7 +11,6 @@ require('./config-maker')
     const path          = require('path')
     const EventEmitter  = require('events')
     
-    process.env.locale = config.locale || 'en'
     if (process.env.NODE_ENV != 'production' && process.env.NODE_ENV != 'development') {
         process.env.NODE_ENV = 'production'
     }
@@ -75,6 +76,7 @@ require('./config-maker')
         commitId,
         lastCommitId
     }
+
     Object.defineProperty(manager, 'clients', {
         get: () => {
             const clients = []
@@ -88,6 +90,24 @@ require('./config-maker')
             return clients
         }
     })
+
+    manager.getClientInServers = async (accessor) => {
+        if (!accessor || accessor.length == 0) {
+            return null
+        }
+
+        const byId = accessor[0] == '@'
+        const clientId = parseInt(accessor.substr(1))
+
+        for (const client of manager.clients) {
+            if ((byId && clientId == client.clientId) || (!byId && client.name.toLowerCase().match(accessor.toLowerCase()))) {
+                return client
+            }
+        }
+
+        return null
+    }
+
     manager.getClient = async (accessor) => {
         if (!accessor || accessor.length == 0) {
             return null
@@ -97,7 +117,7 @@ require('./config-maker')
         const clientId = parseInt(accessor.substr(1))
 
         for (const client of manager.clients) {
-            if ((byId && clientId == client.clientId) || (!byId && client.name.match(accessor))) {
+            if ((byId && clientId == client.clientId) || (!byId && client.name.toLowerCase().match(accessor.toLowerCase()))) {
                 return client
             }
         }

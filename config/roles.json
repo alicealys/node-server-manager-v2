@@ -15,6 +15,14 @@
         ]
     },
     {
+        "id": "role_admin",
+        "name": "Admin",
+        "color": "blue",
+        "permissions": [
+            "moderation.*"
+        ]
+    },
+    {
         "id": "everyone",
         "name": "User",
         "permissions": [
