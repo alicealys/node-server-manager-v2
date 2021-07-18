@@ -17,8 +17,6 @@ class LogClient extends EventEmitter{
             return
         }
 
-        console.log('here')
-
         this.connected = false
 
         io.print(`^1Lost connection^7 to log server ^5${this.url}^7`)
