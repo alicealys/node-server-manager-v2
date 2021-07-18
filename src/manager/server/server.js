@@ -1,7 +1,11 @@
 const Client       = require('./client')
 const EventEmitter = require('events')
 const fs           = require('fs')
+const path         = require('path')
 const string       = require('../../utils/string')
+const io           = require('../../utils/io')
+
+const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
 class Server extends EventEmitter {
     constructor(config, context) {
@@ -90,6 +94,10 @@ class Server extends EventEmitter {
 
     getUptime() {
         const totalSnaps = this.snapshots.length
+        if (totalSnaps == 0) {
+            return 100
+        }
+
         const ups = this.snapshots.reduce((total, snapshot) => total + snapshot.online, 0)
         return (ups / totalSnaps) * 100
     }
@@ -137,7 +145,9 @@ class Server extends EventEmitter {
         })
 
         this.snapshot()
-        setInterval(this.snapshot.bind(this), 5 * 60 * 1000)
+
+        const snapshotInterval = config.snapshotInterval * 1000 || 5 * 60 * 1000
+        setInterval(this.snapshot.bind(this), snapshotInterval)
     }
 
     broadcast(message) {
