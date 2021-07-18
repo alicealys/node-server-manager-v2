@@ -59,7 +59,9 @@ const plugin = {
                     const role = commandUtils.getRole(resultClient.roles)
                     const roleName = role.color ? `<${role.color}>${role.name}<default>` : role.name
 
-                    await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, roleName, moment.tz(result[i].date, client.geoip.timezone).calendar()))
+                    const timezone = client.geoip ? client.geoip.timezone : null
+
+                    await client.tell(string.format(localization['CMD_FIND_RESULT'], result[i].name, result[i].clientId, roleName, moment.tz(result[i].date, timezone).calendar()))
                     client.inGame && await delay(500)
                 }
             })

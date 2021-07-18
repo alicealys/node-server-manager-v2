@@ -5,7 +5,7 @@ const regex = {
     purchase: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" purchased "(.+)"/g,
     assist: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" assisted killing "(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>"/g,
     connect: /"(.+?)\<(\d+)\>\<(\S+)\>\<\>" connected.+/g,
-    disconnect: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" disconnected \(reason "(.+|)"\)/g,
+    disconnect: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+|)\>" disconnected \(reason "(.+|)"\)/gs,
     switch_team: /"(.+?)\<(\d+)\>\<(\S+)\>" switched from team \<(\S+)\> to \<(\S+)\>/g,
     suicide: /"(.+?)\<(\d+)\>\<(\S+)\>\<(\S+)\>" \[(-?\d+) (-?\d+) (-?\d+)\] committed suicide with "(.+)"/g,
     server_cvar: /server_cvar: "(.+)" "(.+|)"/g,

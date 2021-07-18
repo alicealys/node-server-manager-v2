@@ -50,6 +50,7 @@ class Dispatcher {
 
                     this.server.clients.push(client)
                     this.server.emit('connect', client)
+                    console.log('connect')
                 }
                 break
             case 'disconnect':
@@ -70,6 +71,8 @@ class Dispatcher {
                             this.server.clients.splice(i, 1)
                         }
                     }
+
+                    console.log('disconnect')
                 }
                 break
             case 'say':
