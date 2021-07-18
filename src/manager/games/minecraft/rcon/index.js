@@ -1,6 +1,9 @@
-const net    = require('net')
-const varint = require('varint')
-const Mutex  = require('../../../../utils/mutex')
+const net           = require('net')
+const EventListener = require('events')
+const varint        = require('varint')
+const Mutex         = require('../../../../utils/mutex')
+const io            = require('../../../../utils/io')
+const delay         = require('delay')
 
 const PacketTypes = {
     Auth: 3,
@@ -98,7 +101,7 @@ const parser = {
     commandTemplates: {
         tell: 'tellraw {0} "{1}"',
         say: 'tellraw @a "{0}"',
-        kick: 'kick {0} "{1}"',
+        kick: 'kick {0} {1}',
     },
     colors: {
         'white': '§f',
@@ -114,46 +117,80 @@ const parser = {
     }
 }
 
-class Rcon {
+class Rcon extends EventListener {
     constructor(server, config) {
+        super()
+        
         this.server = server
         this.config = config
         this.parser = parser
 
-        this.packetId = 0
-
         this.mutex = new Mutex()
         this.socket = net.Socket()
+        this.socket.on('close', this.onDisconnect.bind(this))
+
+        this.connected = false
+        this.packetId = 0
+    }
+
+    async onDisconnect() {
+        if (!this.connected) {
+            return
+        }
+
+        this.connected = false
+        this.emit('disconnect')
+
+        io.print(`^1Lost connection^7 to '^3${this.config.game}^7' server (^5${this.server.hostname}^7) at ^3${this.config.host}:${this.config.port}^7, attempting to reconnect...`)
+        const tryConnect = () => {
+            return new Promise((resolve, reject) => {
+                this.connect()
+                .then(() => {
+                    resolve(false)
+                })
+                .catch(() => {
+                    resolve(true)
+                })
+            })
+        }
+
+        await delay(5000)
+        while (await tryConnect()) {
+            await delay(5000)
+        }
+
+        this.emit('reconnect')
+        io.print(`^2Reconnected^7 to '^3${this.config.game}^7' server (^5${this.server.hostname}^7) at ^3${this.config.host}:${this.config.port}^7`)
     }
 
     connect() {
         return new Promise(async (resolve, reject) => {
             await this.mutex.lock()
+            this.packetId = 0
             const id = this.packetId++
 
             const onData = (data) => {
                 this.socket.removeListener('error', onError)
-                const response = decodePacket(data)
                 this.mutex.unlock()
             
-                if (response.id == id) {
-                    this.socket.removeListener('error', onError)
-                    resolve()
+                const response = decodePacket(data)
+                if (response.id != id) {
+                    reject('Authentication failed')
                     return
                 }
 
-                reject('Authentication failed')
+                this.connected = true
+                resolve()
             }
             
             const onError = (err) => {
                 this.socket.removeListener('data', onData)
-                reject(err)
+                this.socket.removeListener('connect', onConnect)
                 this.mutex.unlock()
+                reject(err)
             }
 
-            this.socket.once('error', onError)
-
-            this.socket.connect(this.config.rconPort, this.config.host, () => {
+            const onConnect = () => {
                 const packet = encodePacket({
                     id, 
                     type: PacketTypes.Auth, 
@@ -162,7 +199,12 @@ class Rcon {
 
                 this.socket.write(packet)
                 this.socket.once('data', onData)
-            })
+            }
+
+            this.socket.once('error', onError)
+            this.socket.once('connect', onConnect)
+
+            this.socket.connect(this.config.rconPort, this.config.host)
         })
     }
 

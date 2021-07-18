@@ -1,12 +1,16 @@
-const dgram  = require('dgram')
-const delay  = require('delay')
-const Mutex  = require('../../../../utils/mutex')
-const string = require('../../../../utils/string')
-const fs     = require('fs')
-const path   = require('path')
+const dgram         = require('dgram')
+const delay         = require('delay')
+const EventListener = require('events')
+const Mutex         = require('../../../../utils/mutex')
+const string        = require('../../../../utils/string')
+const io            = require('../../../../utils/io')
+const fs            = require('fs')
+const path          = require('path')
 
-class Rcon {
+class Rcon extends EventListener {
     constructor(server, config) {
+        super()
+
         this.server = server
         this.config = config
 
@@ -22,6 +26,35 @@ class Rcon {
 
         this.parser = require(`./parsers/${config.gamename.toUpperCase()}`)
         this.mutex = new Mutex()
+
+        this.connected = false
+    }
+
+    async checkAlive() {
+        while (true) {
+            await this.checkAliveInternal()
+            await delay(5000)
+        }
+    }
+
+    async checkAliveInternal() {
+        const tryConnect = async () => {
+            return await this.command(this.parser.commandTemplates.status)
+        }
+
+        if (await tryConnect()) {
+            return
+        }
+
+        io.print(`^1Lost connection^7 to '^3${this.config.game}^7' server (^5${this.server.hostname}^7) at ^3${this.config.host}:${this.config.port}^7, attempting to reconnect...`)
+        this.emit('disconnect')
+
+        while (!await tryConnect()) {
+            await delay(5000)
+        }
+
+        this.emit('reconnect')
+        io.print(`^2Reconnected^7 to '^3${this.config.game}^7' server (^5${this.server.hostname}^7) at ^3${this.config.host}:${this.config.port}^7`)
     }
 
     connect() {
@@ -37,6 +70,8 @@ class Rcon {
                 return
             }
 
+            this.connected = true
+            this.checkAlive()
             resolve()
         })
     }

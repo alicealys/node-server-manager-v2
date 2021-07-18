@@ -17,6 +17,10 @@ class Dispatcher {
                     const address = event.args[1].split(':')
                     const list = await this.server.rcon.playerList()
                     const player = list.find(player => player.name == name)
+                    const exists = this.server.clients.find(client => client.uniqueId == player.uniqueId)
+                    if (exists) {
+                        return
+                    }
     
                     if (!player) {
                         return

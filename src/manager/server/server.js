@@ -8,10 +8,12 @@ class Server extends EventEmitter {
         super()
         this.config = config
         this.loaded = false
+        this.online = false
 
         this.commands = []
         this.clients = []
         this.dvars = {}
+        this.snapshots = []
 
         if (!fs.existsSync(config.logPath)) {
             throw new Error('Log path does not exist')
@@ -55,6 +57,43 @@ class Server extends EventEmitter {
         return this.rcon.connect()
     }
 
+    snapshot() {
+        if (this.snapshots.length > 300) {
+            this.snapshots.shift()
+        }
+
+        const clientSnapshot = []
+        for (const client of this.clients) {
+            clientSnapshot.push({
+                name: client.name,
+                clientId: client.clientId,
+                uniqueId: client.uniqueId,
+                roles: [...client.roles],
+                slot: client.slot,
+                address: client.address
+            })
+        }
+
+        const snapshot = {
+            dvars: {...this.dvars},
+            hostname: this.hostname,
+            maxClients: this.maxClients,
+            mapname: this.mapname,
+            online: this.online,
+            loaded: this.loaded,
+            uptime: this.getUptime(),
+            clients: clientSnapshot
+        }
+
+        this.snapshots.push(snapshot)
+    }
+
+    getUptime() {
+        const totalSnaps = this.snapshots.length
+        const ups = this.snapshots.reduce((total, snapshot) => total + snapshot.online, 0)
+        return (ups / totalSnaps) * 100
+    }
+
     async start() {
         this.dvars['sv_hostname'] = await this.rcon.getDvar('sv_hostname')
         this.dvars['sv_maxclients'] = parseInt(await this.rcon.getDvar('sv_maxclients'))
@@ -72,15 +111,33 @@ class Server extends EventEmitter {
 
         const players = await this.rcon.playerList()
 
-        for (var i = 0; i < players.length; i++) {
-            const player = players[i]
+        for (const player of players) {
+            if (this.clients.find(client => client.uniqueId == player.uniqueId)) {
+                continue
+            }
 
-            this.clients[i] = new Client({...player, ...{server: this}})
-            await this.clients[i].build()
+            const client = new Client({...player, ...{server: this}})
+            await client.build()
 
-            this.clients[i].emit('preconnect')
-            this.emit('preconnect', this.clients[i])
+            this.clients.push(client)
+
+            client.emit('preconnect')
+            this.emit('preconnect', client)
         }
+
+        this.online = true
+
+        this.rcon.once('disconnect', () => {
+            this.online = false
+            this.clients = []
+        })
+
+        this.rcon.once('reconnect', () => {
+            this.start()
+        })
+
+        this.snapshot()
+        setInterval(this.snapshot.bind(this), 5 * 60 * 1000)
     }
 
     broadcast(message) {

@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/fedddddd/node-server-manager-v2#readme",
   "dependencies": {
+    "asciichart": "^1.5.25",
     "big-integer": "^1.6.48",
     "delay": "^5.0.0",
     "fs": "^0.0.1-security",
