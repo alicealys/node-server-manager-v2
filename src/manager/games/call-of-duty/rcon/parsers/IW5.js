@@ -5,7 +5,8 @@ module.exports = {
         say: 'say {0}',
         kick: 'clientkick {0} "{1}"',
         setDvar: 'set {0} "{1}"',
-        getDvar: 'get {0}'
+        getDvar: 'get {0}',
+        map: 'map {0}'
     },
     responseHeader: /\xff\xff\xff\xffprint\n/g,
     statusHeader: /num +score +bot +ping +guid +name +address +qport */g,

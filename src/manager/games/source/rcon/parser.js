@@ -8,7 +8,8 @@ module.exports = {
         say: 'say {0}',
         kick: 'kickid {0} "{1}"',
         setDvar: '{0} "{1}"',
-        getDvar: '{0}'
+        getDvar: '{0}',
+        map: 'map {0}'
     },
     dvarOverrides: {
         'g_gametype': {

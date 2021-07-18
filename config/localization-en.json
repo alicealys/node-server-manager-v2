@@ -21,6 +21,8 @@
     "CMD_TIME_PARSE_ERROR": "Could not parse duration",
     "CMD_TEMPBAN_MAX_BAN_DURATION": "Maximum ban duration is <blue>{0}<default>",
     "CMD_EXEC_HIERARCHY_ERROR": "Cannot execute this on that client",
+    "CMD_UNAVAILABLE_SERVER": "This command is not available in this server",
+    "CMD_MAP_FORMAT": "Attempting to change the map to <blue>{0}<default> in <blue>3<default> seconds",
 
     "CMD_SERVER_NOT_FOUND": "Server not found",
     "CMD_GRAPH_PLAYER_HISTORY": "Player count of ^5{0}^7 over the last ^4{1}^7:",

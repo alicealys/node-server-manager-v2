@@ -394,6 +394,29 @@ const plugin = {
                 client.tell(string.format(localization['CMD_TEMPBAN_FORMAT'], target.name, reason, moment.duration(parsedTime * 1000).humanize()))
             })
         )
+
+        server.addCommand(
+            new commandUtils.CommandBuilder()
+            .setName('map')
+            .setPermission('server.map')
+            .setMinArgs(1)
+            .setInGame(true)
+            .setCallback(async (client, args) => {
+                const map = args[1]
+
+                if (!server.rcon.parser.commandTemplates.map) {
+                    client.tell(localization['CMD_UNAVAILABLE_SERVER'])
+                    return
+                }
+
+                client.tell(string.format(localization['CMD_MAP_FORMAT'], map))
+
+                await delay(3000)
+
+                const command = string.format(server.rcon.parser.commandTemplates.map, map)
+                server.rcon.command(command)
+            })
+        )
     }
 }
 

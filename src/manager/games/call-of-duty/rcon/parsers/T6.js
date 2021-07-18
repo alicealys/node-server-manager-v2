@@ -5,7 +5,8 @@ module.exports = {
         say: 'say {0}',
         kick: 'clientkick_for_reason {0} "{1}"',
         setDvar: 'set {0} "{1}"',
-        getDvar: 'get {0}'
+        getDvar: 'get {0}',
+        map: 'map {0}'
     },
     rconCommandFormat: '\xff\xff\xff\xffrcon {0} {1}',
     responseHeader: /\xff\xff\xff\xffprint/g,
