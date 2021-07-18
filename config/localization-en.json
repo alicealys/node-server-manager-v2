@@ -20,9 +20,9 @@
     "CMD_TEMPBAN_MAX_BAN_DURATION": "Maximum ban duration is <blue>{0}<default>",
     "CMD_EXEC_HIERARCHY_ERROR": "Cannot execute this on that client",
 
-    "PENALTIES_KICK_MSG": "You have been kicked: <blue>{0}<default>",
-    "PENALTIES_BAN_MSG": "<default>Permanently banned for: <blue>{0}<default>",
-    "PENALTIES_TEMPBAN_MSG": "<default>Temporarily banned for: <blue>{0}<default>, time left: <blue>{1}<default>",
+    "PENALTIES_KICK_MSG": "You have been kicked: {0}",
+    "PENALTIES_BAN_MSG": "Permanently banned for: {0}",
+    "PENALTIES_TEMPBAN_MSG": "Temporarily banned for: {0}, time left: {1}",
 
     "CMD_KICK_FORMAT": "Kicked <blue>{0}<default> for <blue>{1}<default>",
     "CMD_BAN_FORMAT": "Permanently banned <blue>{0}<default> for <blue>{1}<default>",
