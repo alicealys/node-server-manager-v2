@@ -8,17 +8,24 @@ require('./config-maker')
     const https = require('https')
     const http  = require('http')
     const io    = require('../utils/io')
+
+    process.on('uncaughtException', (e) => {
+        io.print(`Failed to start log Server: ^1${e}`)
+    })
     
     if (!config.logServer) {
-        throw new Error('Log server not set in config')
+        io.print('^1Log server not set in config')
+        return
     }
     
     if (!config.logServer.port) {
-        throw new Error('Log server port not set in config')
+        io.print('^1Log server port not set in config')
+        return
     }
     
     if (!config.logServer.password) {
-        throw new Error('Log server password not set in config')
+        io.print('^1Log server password not set in config')
+        return
     }
     
     const password = config.logServer.password
@@ -26,11 +33,13 @@ require('./config-maker')
     
     if (config.logServer.ssl) {
         if (!config.logServer.ssl.key) {
-            throw new Error('Log server ssl.key set in config')
+            io.print('^1Log server ssl.key set in config')
+            return
         }
     
         if (!config.logServer.ssl.cert) {
-            throw new Error('Log server ssl.cert set in config')
+            io.print('^1Log server ssl.cert set in config')
+            return
         }
     
         try {
