@@ -45,8 +45,7 @@ module.exports = {
             super()
 
             if (!fs.existsSync(path)) {
-                console.log('FileWatcher: Invalid path')
-                return
+                throw 'FileWatcher: Invalid path'
             }
 
             const callback = (data) => {

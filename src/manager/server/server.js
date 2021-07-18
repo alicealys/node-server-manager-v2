@@ -4,6 +4,7 @@ const fs           = require('fs')
 const path         = require('path')
 const string       = require('../../utils/string')
 const io           = require('../../utils/io')
+const LogClient    = require('../log-client')
 
 const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
@@ -19,12 +20,20 @@ class Server extends EventEmitter {
         this.dvars = {}
         this.snapshots = []
 
-        if (!fs.existsSync(config.logPath)) {
+        if (!fs.existsSync(config.logPath) && !config.logUrl) {
             throw new Error('Log path does not exist')
+        }
+        
+        if (!config.logPath && !config.logUrl) {
+            throw new Error('Log path or log server url not set in config')
+        }
+
+        if (config.logUrl) {
+            this.logClient = new LogClient(config.logUrl)
         }
 
         this.rcon = new (require(`../games/${config.game}/rcon`))(this, config)
-        this.log = new (require(`../games/${config.game}/log`))(this, config)
+        this.log = new (require(`../games/${config.game}/log`))(this, config, this.logClient)
 
         const keys = Object.keys(context)
         keys.forEach(key => {
@@ -58,7 +67,25 @@ class Server extends EventEmitter {
     }
 
     connect() {
-        return this.rcon.connect()
+        return new Promise((resolve, reject) => {
+            this.rcon.connect()
+            .then(() => {
+                if (this.logClient) {
+                    this.logClient.connect()
+                    .then(() => {
+                        resolve()
+                    })
+                    .catch((e) => {
+                        reject(e)
+                    })
+                } else {
+                    resolve()
+                }
+            })
+            .catch((e) => {
+                reject(e)
+            })
+        })
     }
 
     snapshot() {

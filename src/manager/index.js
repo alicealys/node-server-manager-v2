@@ -126,30 +126,27 @@ require('./config-maker')
     }
     
     const loadServer = (cfg, context) => {
-        return new Promise((resolve, reject) => {
-            try {
-                const server = new Server({...globalConfig, ...cfg}, context)
-                servers.push(server)
-                resolve()
+        try {
+            const server = new Server({...globalConfig, ...cfg}, context)
+            servers.push(server)
 
-                const loader = new PluginLoader(server)
+            const loader = new PluginLoader(server)
 
-                server.connect()
-                .then(async () => {
-                    await server.start()
-                    loader.onLoad()
-                    server.loaded = true
-                    server.emit('loaded')
-                    io.print(`^2Now watching^7 '^3${cfg.game}^7' server (^5${server.hostname}^7) at ^3${cfg.host}:${cfg.port}`)
-                })
-                .catch((e) => {
-                    handleConnectError(cfg, e)
-                })
-            }
-            catch (e) {
-                handleError(cfg, e)
-            }
-        })
+            server.connect()
+            .then(async () => {
+                await server.start()
+                loader.onLoad()
+                server.loaded = true
+                server.emit('loaded')
+                io.print(`^2Now watching^7 '^3${cfg.game}^7' server (^5${server.hostname}^7) at ^3${cfg.host}:${cfg.port}`)
+            })
+            .catch((e) => {
+                handleConnectError(cfg, e)
+            })
+        }
+        catch (e) {
+            handleError(cfg, e)
+        }
     }
     
     (async () => {
@@ -164,7 +161,7 @@ require('./config-maker')
             })
 
             for (const cfg of config.servers) {
-                await loadServer(cfg, {database, manager})
+                loadServer(cfg, {database, manager})
             }
         
             loader.onLoad(manager)

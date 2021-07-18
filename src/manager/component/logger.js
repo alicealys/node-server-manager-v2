@@ -15,7 +15,8 @@ const getExternalAddress = async () => {
     }
 
     const result = await (await fetch('https://extreme-ip-lookup.com/json')).json()
-    return result.query
+    externalAddress = result.query
+    return externalAddress
 }
 
 function isPrivateIP(ip) {

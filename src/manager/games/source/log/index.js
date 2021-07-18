@@ -5,19 +5,26 @@ const fs         = require('fs')
 const path       = require('path')
 
 class Log {
-    constructor(server, config) {
+    constructor(server, config, watcher = null) {
         this.server = server
         this.config = config
 
         const parser = new Parser()
         const dispatcher = new Dispatcher(server)
 
-        const pipe = (data) => {
+        this.callback = (data) => {
             const event = parser.parse(data)
 
             if (event.valid) {
                 dispatcher.dispatch(event)
             }
+        }
+
+        if (watcher) {
+            watcher.pipe((data) => {
+                this.callback(data)
+            })
+            return
         }
 
         if (!fs.lstatSync(config.logPath).isDirectory()) {
@@ -38,7 +45,9 @@ class Log {
             })
 
             this.watcher = new io.FileWatcher(path.join(config.logPath, files[0].name))
-            this.watcher.pipe(pipe)
+            this.watcher.pipe((data) => {
+                this.callback(data)
+            })
 
             fs.watch(config.logPath, (eventType, filename) => {
                 if (currentFile != filename) {
@@ -48,7 +57,9 @@ class Log {
                     }
     
                     this.watcher = new io.FileWatcher(path.join(config.logPath, filename))
-                    this.watcher.pipe(pipe)
+                    this.watcher.pipe((data) => {
+                        this.callback(data)
+                    })
                 }
     
                 currentFile = filename
