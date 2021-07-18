@@ -41,10 +41,12 @@ class Log {
                 }
             })
             .sort((a, b) => {
-                return b.time - a.time
+                return b.creationTime - a.creationTime
             })
 
-            this.watcher = new io.FileWatcher(path.join(config.logPath, files[0].name))
+            currentFile = files[0].name
+
+            this.watcher = new io.FileWatcher(path.join(config.logPath, currentFile))
             this.watcher.pipe((data) => {
                 this.callback(data)
             })
@@ -55,7 +57,7 @@ class Log {
                         this.watcher.destroy()
                         this.watcher = null
                     }
-    
+                    
                     this.watcher = new io.FileWatcher(path.join(config.logPath, filename))
                     this.watcher.pipe((data) => {
                         this.callback(data)
