@@ -52,13 +52,9 @@ class Client extends EventEmitter {
         })
 
         const durationString = moment.duration(duration * 1000).humanize()
-        const message = string.parseColors(this.server.rcon.parser.colors, 
-            string.format(
-                localization['PENALTIES_TEMPBAN_MSG'],
-                reason,
-                durationString
-            )
-        )
+        const message = raw
+            ? reason
+            : string.format(localization['PENALTIES_TEMPBAN_MSG'], reason, durationString)
 
         const command = string.format(
             this.server.rcon.parser.commandTemplates.kick, 
@@ -93,13 +89,9 @@ class Client extends EventEmitter {
             reason: reason
         })
 
-        const message = string.parseColors(
-            this.server.rcon.parser.colors, 
-            string.format(
-                localization['PENALTIES_BAN_MSG'],
-                reason
-            )
-        )
+        const message = raw
+            ? reason
+            : string.format(localization['PENALTIES_BAN_MSG'], reason)
 
         const command = string.format(
             this.server.rcon.parser.commandTemplates.kick,
@@ -133,15 +125,9 @@ class Client extends EventEmitter {
             active: 0
         })
 
-        const message = string.parseColors(
-            this.server.rcon.parser.colors,
-            raw 
-                ? reason
-                : string.format(
-                    localization['PENALTIES_KICK_MSG'],
-                    reason
-                )
-        )
+        const message = raw
+            ? reason
+            : string.format(localization['PENALTIES_KICK_MSG'], reason)
 
         const command = string.format(
             this.server.rcon.parser.commandTemplates.kick,

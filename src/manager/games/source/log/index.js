@@ -31,6 +31,10 @@ class Log {
             throw new Error('Log path must be a folder')
         }
 
+        if (!fs.existsSync(config.logPath)) {
+            throw new Error('Log path does not exist')
+        }
+
         var currentFile = null
 
         fs.readdir(config.logPath, (err, files) => {

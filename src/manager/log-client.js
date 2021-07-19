@@ -3,7 +3,7 @@ const EventEmitter = require('events')
 const delay        = require('delay')
 const io           = require('../utils/io')
 
-class LogClient extends EventEmitter{
+class LogClient extends EventEmitter {
     constructor(url) {
         super()
 

@@ -1,3 +1,4 @@
+const fs         = require('fs')
 const io         = require('../../../../utils/io')
 const Parser     = require('./parser')
 const Dispatcher = require('./dispatcher')
@@ -6,6 +7,11 @@ class Log {
     constructor(server, config, watcher = null) {
         this.server = server
         this.config = config
+
+        if (!fs.existsSync(config.logPath) && !watcher) {
+            throw new Error('Log path does not exist')
+        }
+
         this.watcher = watcher || new io.FileWatcher(config.logPath)
         this.parser = new Parser()
         this.dispatcher = new Dispatcher(server)

@@ -20,16 +20,12 @@ class Server extends EventEmitter {
         this.dvars = {}
         this.snapshots = []
 
-        if (!fs.existsSync(config.logPath) && !config.logUrl) {
-            throw new Error('Log path does not exist')
-        }
-        
-        if (!config.logPath && !config.logUrl) {
-            throw new Error('Log path or log server url not set in config')
-        }
-
         if (config.logUrl) {
             this.logClient = new LogClient(config.logUrl)
+        }
+
+        if (!fs.existsSync(path.join(__dirname, `../games/${config.game}/rcon`) || !fs.existsSync(path.join(__dirname, `../games/${config.game}/log`)))) {
+            throw new Error('Unsupported game')
         }
 
         this.rcon = new (require(`../games/${config.game}/rcon`))(this, config)

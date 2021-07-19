@@ -72,6 +72,10 @@
         "unban": {
             "usage": "{0}unban <@clientId|name> <reason>",
             "description": "Remove all active bans of a player"
+        },
+        "map": {
+            "usage": "{0}map <mapname>",
+            "description": "Change the current map"
         }
     }
 }
