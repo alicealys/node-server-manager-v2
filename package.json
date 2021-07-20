@@ -2,8 +2,9 @@
   "name": "server-manager-v2",
   "version": "1.0.0",
   "description": "Improved version of [node-server-manager](https://github.com/fedddddd/node-server-manager) that supports multiple games",
-  "main": "index.js",
+  "main": "src/manager/index.js",
   "scripts": {
+    "start": "node src/manager",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
