@@ -20,6 +20,8 @@
   "dependencies": {
     "asciichart": "^1.5.25",
     "big-integer": "^1.6.48",
+    "cli-table": "^0.3.6",
+    "colors": "^1.4.0",
     "delay": "^5.0.0",
     "fs": "^0.0.1-security",
     "geoip-lite": "^1.4.2",

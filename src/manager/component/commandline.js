@@ -1,11 +1,14 @@
 const path         = require('path')
 const humanize     = require('humanize-duration')
+const array        = require('../../utils/array')
 const io           = require('../../utils/io')
 const string       = require('../../utils/string')
 const localization = require('../../utils/localization')
 const rl           = require('serverline')
-const commanUtils  = require('../server/command')
+const commandUtils = require('../server/command')
 const asciichart   = require('asciichart')
+const __colors     = require('colors')
+const Table        = require('cli-table')
 
 const config       = new io.ConfigWatcher(path.join(__dirname, '../../../config/config.json'))
 
@@ -13,28 +16,43 @@ rl.init({
     prompt: '\x1b[34m[nsm²] > \x1b[0m'
 })
 
-function chunkArray(arr, len) {
-    var chunks = []
-    var i = 0
-    var n = arr.length
-
-    while (i < n) {
-        chunks.push(arr.slice(i, i += len))
-    }
-
-    return chunks
-}
-
 var manager = null
 
-const consoleCommands = {
-    'quit': () => {
+const findServer = (selector) => {
+    selector = selector.toLowerCase()
+    const servers = manager.servers.filter(server => server.loaded)
+
+    return servers.find(server => {
+        const name = `${server.config.host}:${server.config.port}`
+        const alt = `${server.config.host}${server.config.port}`
+        const hostname = server.hostname.toLowerCase()
+        
+        return hostname.match(selector)
+            || alt.match(selector)
+            || name.match(selector)
+    }) || servers[parseInt(selector)]
+}
+
+const print = (string) => {
+    io.print(parseColors(string))
+}
+
+const consoleCommands = [
+    new commandUtils.CommandBuilder()
+    .setName('quit')
+    .setCallback(() => {
         process.exit(0)
-    },
-    'clear': () => {
+    }),
+
+    new commandUtils.CommandBuilder()
+    .setName('clear')
+    .setCallback(() => {
         process.stdout.write('\u001B[2J\u001B[0;0f')
-    },
-    'status': () => {
+    }),
+
+    new commandUtils.CommandBuilder()
+    .setName('status')
+    .setCallback(() => { 
         for (const server of manager.servers.filter(server => server.loaded)) {
             io.print(string.format(localization['CMD_STATUS_FORMAT'],
                 server.hostname,
@@ -46,17 +64,13 @@ const consoleCommands = {
                 server.mapname || 'none'
             ))
         }
-    },
-    'graph': (args) => {
-        const selector = args.join(1)
-        const servers = manager.servers.filter(server => server.loaded)
-        var server = null
+    }),
 
-        if (Number.isInteger(parseInt(selector))) {
-            server = servers[parseInt(selector)]
-        } else {
-            server = servers.find(server => server.hostname.toLowerCase().match(selector.toLowerCase()))
-        }
+    new commandUtils.CommandBuilder()
+    .setName('graph')
+    .setCallback((client, args) => {
+        const selector = args.join(1)
+        const server = findServer(selector)
 
         if (!server) {
             console.log(localization['CMD_SERVER_NOT_FOUND'])
@@ -113,8 +127,11 @@ const consoleCommands = {
                 return ('   ' + x.toFixed(0)).slice(-3) 
             }
         }))
-    },
-    'tree': () => {
+    }),
+
+    new commandUtils.CommandBuilder()
+    .setName('tree')
+    .setCallback(() => {
         const servers = manager.servers.filter(server => server.loaded)
         const offlineServers = servers.filter(server => !server.online)
         const totalClients = manager.clients.length
@@ -151,12 +168,60 @@ const consoleCommands = {
 
             o++
         }
+    }),
+
+    new commandUtils.CommandBuilder()
+    .setName('help')
+    .setCallback((client, args) => {
+        const table = new Table({
+            head: [
+                localization['CMD_NAME'].magenta.bold,
+                localization['CMD_DESCRIPTION'].white,
+                localization['CMD_USAGE'].yellow.bold
+            ]
+        })
+
+        if (args.length > 1 && !Number.isInteger(parseInt(args[1]))) {
+            const commandName = args[1].toLowerCase()
+            const command = commands.find(command => command.name.startsWith(commandName) 
+                || (command.alias && command.alias.startsWith(commandName)))
+
+            if (!command) {
+                client.tell(string.format(localization['CMD_COMMAND_NOT_FOUND'], `${config.commandPrefix}help`))
+                return
+            }
+
+            table.push([
+                command.name.magenta,
+                command.getDescription(),
+                command.getUsage().yellow
+            ])
+        } else {
+            for (var i = 0; i < commands.length; i++) {
+                table.push([
+                    commands[i].name.magenta,
+                    commands[i].getDescription(),
+                    commands[i].getUsage().yellow
+                ])
+            }
+        }
+
+        print(table.toString())
+    })
+]
+
+var commands = [...consoleCommands]
+const completion = []
+
+commands.forEach(command => {
+    completion.push(command.name)
+
+    if (command.alias) {
+        completion.push(command.alias)
     }
-}
+})
 
-var commands = {...consoleCommands}
-
-rl.setCompletion(Object.keys(consoleCommands))
+rl.setCompletion(completion)
 
 rl.on('line', (cmd) => {
     if (cmd.length == 0) {
@@ -167,28 +232,26 @@ rl.on('line', (cmd) => {
         cmd = cmd.substr(config.commandPrefix.length)
     }
 
-    const args = cmd.trim().split(/\s+/g)
-    const name = args[0]
+    var args = cmd.trim().split(/\s+/g)
 
-    args.join = (index) => {
-        var buffer = ""
-        for (var i = index; i < args.length; i++) {
-            buffer += args[i]
-            if (i < args.length - 1) {
-                buffer += " "
-            }
-        }
-
-        return buffer
-    }
-
-    if (!commands[name]) {
-        io.print(parseColors(string.format(localization['CMD_COMMAND_NOT_FOUND'], `${config.commandPrefix}help`)))
+    const name = args[0].toLowerCase()
+    const command = commands.find(cmd => cmd.name == name || (cmd.alias && cmd.alias == name))
+    if (!command) {
+        print(string.format(localization['CMD_COMMAND_NOT_FOUND'], `${config.commandPrefix}help`))
         return
     }
     
-    commands[name](args)
-    return
+    const client = {
+        clientId: manager.database.consoleId,
+        roles: ['role_console'],
+        server: manager.server,
+        inGame: false,
+        tell: (msg) => {
+            print(msg.trim())
+        }
+    }
+
+    command.execute(client, args)
 })
 
 const colors = {
@@ -214,34 +277,30 @@ const parseColors = (message) => {
 }
 
 const addServerCommands = (server) => {
-    for (const cmd of server.commands) {
-        if (cmd.inGame) {
-            continue
+    commands = [...consoleCommands]
+
+    server.commands.forEach(command => {
+        const name = command.name.toLowerCase()
+
+        if (command.inGame || consoleCommands.find(cmd => cmd.name == name 
+            || (command.alias && cmd.alias && command.alias == cmd.alias.toLowerCase()))) {
+            return
         }
 
-        const callback = async (args) => {
-            const client = {
-                clientId: server.database.consoleId,
-                roles: ['role_console'],
-                server: server,
-                inGame: false,
-                tell: (msg) => {
-                    io.print(parseColors(msg.trim()))
-                }
-            }
+        commands.push(command)
+    })
 
-            await cmd.execute(client, args)
+    const completion = []
+
+    commands.forEach(command => {
+        completion.push(command.name)
+    
+        if (command.alias) {
+            completion.push(command.alias)
         }
+    })
 
-        commands[cmd.name] = callback
-        if (cmd.alias) {
-            commands[cmd.alias] = callback
-        }
-
-        commands = {...commands, ...consoleCommands}
-        
-        rl.setCompletion(Object.keys(commands))
-    }
+    rl.setCompletion(completion)
 }
 
 module.exports = {

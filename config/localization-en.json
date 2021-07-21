@@ -38,6 +38,10 @@
     "CMD_UNBAN_FORMAT": "Unbanned <blue>{0}<default> for <blue>{1}<default>",
     "CMD_UNBAN_NOT_BANNED_FORMAT": "<blue>{0}<default> isn't banned",
 
+    "CMD_NAME": "Name",
+    "CMD_DESCRIPTION": "Description",
+    "CMD_USAGE": "Usage",
+
     "NOT_DEFINED": "Not defined",
 
     "commands": {
@@ -76,6 +80,26 @@
         "map": {
             "usage": "{0}map <mapname>",
             "description": "Change the current map"
+        },
+        "quit": {
+            "usage": "{0}quit",
+            "description": "Terminate the process"
+        },
+        "clear": {
+            "usage": "{0}clear",
+            "description": "Clear the console"
+        },
+        "status": {
+            "usage": "{0}status",
+            "description": "Display servers' status"
+        },
+        "graph": {
+            "usage": "{0}graph <server index|server host:port|hostname>",
+            "description": "Display servers' player count and uptime graphs"
+        },
+        "tree": {
+            "usage": "{0}tree",
+            "description": "Display servers and their players as tree view"
         }
     }
 }
