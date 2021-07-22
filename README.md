@@ -14,6 +14,7 @@ Improved version of [node-server-manager](https://github.com/fedddddd/node-serve
     * Counter-Strike: Global Offensive
     * Team Fortress 2
     * Garry's Mod
+    * Left 4 Dead 2
     * ...
   * Minecraft
   * Rust
