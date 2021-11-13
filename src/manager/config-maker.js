@@ -262,6 +262,7 @@ module.exports = new Promise((resolve, reject) => {
 
         if (question.show != undefined && !question.show()) {
             askQuestion(index + 1)
+            return
         }
 
         rl.question(io.formatColors(question.text), (string) => {
