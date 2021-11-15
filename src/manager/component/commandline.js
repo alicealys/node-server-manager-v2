@@ -160,7 +160,7 @@ const consoleCommands = [
                 const branch = i++ < server.clients.length - 1 ? '├───' : '└───'
                 const mainBranch = o < servers.length - 1 ? '│' : ' '
                 const time = new Date(new Date() - client.connected).toISOString().substr(11, 8)
-                const role = commanUtils.getRole(client.roles)
+                const role = commandUtils.getRole(client.roles)
                 const roleName = parseColors(role.color ? `<${role.color}>${role.name}<default>` : role.name)
 
                 io.print(string.format(localization['CMD_LIST_PLAYER'], mainBranch, branch, client.name, client.clientId, roleName, time, client.uniqueId))
