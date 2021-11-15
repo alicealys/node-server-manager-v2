@@ -34,6 +34,11 @@ instance.connect = (config) => {
         switch (config.database.dialect.toLowerCase()) {
             case 'sqlite':
                 var dbPath = config.database.path
+                if (!dbPath) {
+                    reject(new Error('Database path not set in config'))
+                    return
+                }
+
                 dbPath = dbPath || 'database/database.db'
                 dbPath = path.join(__dirname, '../../../', dbPath)
                 fs.mkdirSync(path.dirname(dbPath), {recursive: true})
